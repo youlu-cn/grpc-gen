@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package example;
+
+import "annotations.proto";
+
+message Request {
+}
+
+message Response {
+}
+
+service Example {
+    // comment
+    rpc test1 (Request) returns (Response) {
+        option (grpc_gen.options.access) = {
+            level: 1
+        };
+    }
+}
+
+service Example2 {
+    // comment
+    rpc test2 (Request) returns (Response) {
+        option (grpc_gen.options.access) = {
+            level: 2
+        };
+    }
+    rpc test3 (Request) returns (Response) {
+        option (grpc_gen.options.access) = {
+            level: 3
+        };
+    }
+}
