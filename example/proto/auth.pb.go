@@ -4,10 +4,10 @@
 package example
 
 import (
-	_ "auth"
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	_ "github.com/youlu-cn/grpc-gen/protoc-gen-auth/auth"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
