@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "auth";
+
+import "google/protobuf/descriptor.proto";
+
+enum AccessLevel {
+  _NO_LIMIT           = 0;   // Public access.
+  LOW_ACCESS_LEVEL    = 100; // Lower access required.
+  MIDDLE_ACCESS_LEVEL = 200; // Middle access required.
+  HIGH_ACCESS_LEVEL   = 300; // High access required.
+  SERVER_INTERNAL     = 400; // For server internal only.
+}
+
+message Access {
+  AccessLevel level = 1;
+}
+
+extend google.protobuf.MethodOptions {
+  // ID assigned by protobuf-global-extension-registry@google.com for grpc-gateway project.
+  //
+  // All IDs are the same, as assigned. It is okay that they are the same, as they extend
+  // different descriptor messages.
+  Access access = 1042;
+}
+
+enum VisibleScope {
+  PUBLIC_SCOPE   = 0; // Public service scope.
+  INTERNAL_SCOPE = 1; // Internal service scope.
+  ALL_SCOPE      = 2; // Public & Internal.
+}
+
+message Visible {
+  VisibleScope scope = 1;
+}
+
+extend google.protobuf.ServiceOptions {
+  Visible visible = 1042;
+}

@@ -13,7 +13,9 @@ func Register(tpl *template.Template, params pgs.Parameters) {
 	}
 
 	tpl.Funcs(map[string]interface{}{
-		"pkg":  fn.PackageName,
-		"auth": fn.Auth,
+		"pkg":    fn.PackageName,
+		"scope":  fn.Scope,
+		"hasGw":  fn.GatewayDefined,
+		"access": fn.Access,
 	})
 }

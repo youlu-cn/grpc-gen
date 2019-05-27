@@ -2,7 +2,9 @@ syntax = "proto3";
 
 package example;
 
-import "annotations.proto";
+import "auth/annotations.proto";
+import "google/api/annotations.proto";
+
 
 message Request {
 }
@@ -11,24 +13,37 @@ message Response {
 }
 
 service Example {
+    // service scope
+    option (auth.visible) = {
+        scope: PUBLIC_SCOPE
+    };
+
     // comment
     rpc test1 (Request) returns (Response) {
-        option (grpc_gen.options.access) = {
-            level: 1
+        option (auth.access) = {
+            level: LOW_ACCESS_LEVEL
         };
     }
 }
 
 service Example2 {
+    // service scope
+    option (auth.visible) = {
+        scope: ALL_SCOPE
+    };
+
     // comment
     rpc test2 (Request) returns (Response) {
-        option (grpc_gen.options.access) = {
-            level: 2
+        option (auth.access) = {
+            level: MIDDLE_ACCESS_LEVEL
+        };
+        option (google.api.http) = {
+            get: "/example/test"
         };
     }
     rpc test3 (Request) returns (Response) {
-        option (grpc_gen.options.access) = {
-            level: 3
+        option (auth.access) = {
+            level: SERVER_INTERNAL
         };
     }
 }
