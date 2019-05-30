@@ -23,7 +23,7 @@ extend google.protobuf.MethodOptions {
   //
   // All IDs are the same, as assigned. It is okay that they are the same, as they extend
   // different descriptor messages.
-  Access access = 1042;
+  Access access = 2360;
 }
 
 enum VisibleScope {
@@ -37,5 +37,5 @@ message Visible {
 }
 
 extend google.protobuf.ServiceOptions {
-  Visible visible = 1042;
+  Visible visible = 1360;
 }

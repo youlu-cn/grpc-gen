@@ -33,7 +33,7 @@ func UnaryServerInterceptor(v Authenticator) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		gRPCService, ok := info.Server.(Implementor)
 		if !ok {
-			return nil, status.Errorf(codes.Unimplemented, "server not implement GRPCService")
+			return nil, status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
 		}
 		if err := v.Authenticate(ctx, gRPCService.AccessLevel(info.FullMethod)); err != nil {
 			return nil, status.Errorf(codes.PermissionDenied, err.Error())
@@ -52,7 +52,7 @@ func StreamServerInterceptor(v Authenticator) grpc.StreamServerInterceptor {
 	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		gRPCService, ok := srv.(Implementor)
 		if !ok {
-			return status.Errorf(codes.Unimplemented, "server not implement GRPCService")
+			return status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
 		}
 		if err := v.Authenticate(stream.Context(), gRPCService.AccessLevel(info.FullMethod)); err != nil {
 			return status.Errorf(codes.PermissionDenied, err.Error())
