@@ -25,7 +25,7 @@ func (fn Func) Access(svc pgs.Service) map[string]auth.AccessLevel {
 		descs, _ := proto.ExtensionDescs(opts)
 
 		for _, desc := range descs {
-			if desc.Field == 1042 {
+			if desc.Field == 2360 {
 				ext, _ := proto.GetExtension(opts, desc)
 				if access, ok := ext.(*auth.Access); ok {
 					out[fullPath] = access.Level
@@ -43,7 +43,7 @@ func (fn Func) Scope(svc pgs.Service) auth.VisibleScope {
 	descs, _ := proto.ExtensionDescs(opts)
 
 	for _, desc := range descs {
-		if desc.Field == 1042 {
+		if desc.Field == 1360 {
 			ext, _ := proto.GetExtension(opts, desc)
 			if visible, ok := ext.(*auth.Visible); ok {
 				return visible.Scope

@@ -36,7 +36,7 @@ func UnaryServerInterceptor(v Authenticator) grpc.UnaryServerInterceptor {
 			return nil, status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
 		}
 		if err := v.Authenticate(ctx, gRPCService.AccessLevel(info.FullMethod)); err != nil {
-			return nil, status.Errorf(codes.PermissionDenied, err.Error())
+			return nil, status.Errorf(codes.Unauthenticated, err.Error())
 		}
 		return handler(ctx, req)
 	}
@@ -55,7 +55,7 @@ func StreamServerInterceptor(v Authenticator) grpc.StreamServerInterceptor {
 			return status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
 		}
 		if err := v.Authenticate(stream.Context(), gRPCService.AccessLevel(info.FullMethod)); err != nil {
-			return status.Errorf(codes.PermissionDenied, err.Error())
+			return status.Errorf(codes.Unauthenticated, err.Error())
 		}
 		return handler(srv, stream)
 	}
