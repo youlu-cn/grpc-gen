@@ -3,7 +3,7 @@ syntax = "proto3";
 package auth;
 
 option go_package = "github.com/youlu-cn/grpc-gen/protoc-gen-auth/auth;auth";
-option java_package = "com.github.grpc-gen.auth";
+option java_package = "com.github.grpc_gen.auth";
 
 import "google/protobuf/descriptor.proto";
 
