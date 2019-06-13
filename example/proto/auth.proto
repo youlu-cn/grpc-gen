@@ -5,20 +5,41 @@ package example;
 import "auth/annotations.proto";
 import "google/api/annotations.proto";
 
+enum RequestType {
+    _NONE = 0;
+    TYPE1 = 1; // request type 1
+    // request type 2
+    TYPE2 = 2;
+}
 
 message Request {
+    //
+    // leading comment
+    // 2rd comment line
+    //
+    int32 id = 1;
+    string name = 2;
+    RequestType type = 3; // enum field
+    repeated string array = 4; // string array
+    map<string, RequestType> map = 5; // map field
 }
 
 message Response {
+    message Embed {
+        int32 id = 1; // response id
+    }
+
+    Embed embed = 1; // embed message
 }
 
+// Example Service.
 service Example {
     // service scope
     option (auth.visible) = {
         scope: PUBLIC_SCOPE
     };
 
-    // comment
+    // test1 comment
     rpc test1 (Request) returns (Response) {
         option (auth.access) = {
             level: LOW_ACCESS_LEVEL
@@ -26,13 +47,14 @@ service Example {
     }
 }
 
+// Example2 Service.
 service Example2 {
     // service scope
     option (auth.visible) = {
         scope: ALL_SCOPE
     };
 
-    // comment
+    // test2 comment
     rpc test2 (Request) returns (Response) {
         option (auth.access) = {
             level: MIDDLE_ACCESS_LEVEL
@@ -41,6 +63,8 @@ service Example2 {
             get: "/example/test"
         };
     }
+
+    // test3 interface
     rpc test3 (Request) returns (Response) {
         option (auth.access) = {
             level: SERVER_INTERNAL

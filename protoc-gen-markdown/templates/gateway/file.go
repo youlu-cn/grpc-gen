@@ -1,0 +1,4 @@
+package gateway
+
+const fileTpl = `
+`

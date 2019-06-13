@@ -11,5 +11,5 @@ var _ = auth.AccessLevel__NO_LIMIT
 
 {{ range .Services }}
 {{ template "service" . }}
-{{end}}
+{{ end }}
 `

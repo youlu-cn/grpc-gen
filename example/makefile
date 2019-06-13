@@ -3,6 +3,7 @@ PROJECT_NAME = example
 
 _cleango:
 	@rm -rf proto/*.go
+	@rm -rf proto/*.md
 
 _gengo:
 	@protoc -Iproto \
@@ -11,6 +12,7 @@ _gengo:
 		--go_out=plugins=grpc:proto \
 		--grpc-gateway_out=logtostderr=true:proto \
 		--auth_out="lang=go:proto" \
+		--markdown_out=":proto" \
 		proto/*.proto
 
 gen: clean _gengo
