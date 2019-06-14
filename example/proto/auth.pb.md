@@ -43,21 +43,21 @@
 
 * 请求类型: ***Request***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|id|int| leading comment<br> 2rd comment line|-|false|
-|name|string|TODO|-|false|
-|type|[RequestType](#requesttype)| enum field|-|false|
-|array|string array| string array|-|false|
-|map|map\<string, [RequestType](#requesttype)\>| map field|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|id|int|number/string| leading comment<br> 2rd comment line|-|false|
+|name|string|string|TODO|-|false|
+|type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
+|array|[string] array|string| string array|-|false|
+|map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
 * 返回类型: ***Response***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|embed|[Embed](#embed)| embed message|-|false|
-|ex|[External](#external)|TODO|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|embed|[Embed](#embed)|object| embed message|-|false|
+|ex|[External](#external)|object|TODO|-|false|
 
 
 
@@ -78,21 +78,21 @@
 
 * 请求类型: ***Request***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|id|int| leading comment<br> 2rd comment line|-|false|
-|name|string|TODO|-|false|
-|type|[RequestType](#requesttype)| enum field|-|false|
-|array|string array| string array|-|false|
-|map|map\<string, [RequestType](#requesttype)\>| map field|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|id|int|number/string| leading comment<br> 2rd comment line|-|false|
+|name|string|string|TODO|-|false|
+|type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
+|array|[string] array|string| string array|-|false|
+|map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
 * 返回类型: ***Response***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|embed|[Embed](#embed)| embed message|-|false|
-|ex|[External](#external)|TODO|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|embed|[Embed](#embed)|object| embed message|-|false|
+|ex|[External](#external)|object|TODO|-|false|
 
 
 
@@ -104,21 +104,21 @@
 
 * 请求类型: ***Request***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|id|int| leading comment<br> 2rd comment line|-|false|
-|name|string|TODO|-|false|
-|type|[RequestType](#requesttype)| enum field|-|false|
-|array|string array| string array|-|false|
-|map|map\<string, [RequestType](#requesttype)\>| map field|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|id|int|number/string| leading comment<br> 2rd comment line|-|false|
+|name|string|string|TODO|-|false|
+|type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
+|array|[string] array|string| string array|-|false|
+|map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
 * 返回类型: ***Response***
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|embed|[Embed](#embed)| embed message|-|false|
-|ex|[External](#external)|TODO|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|embed|[Embed](#embed)|object| embed message|-|false|
+|ex|[External](#external)|object|TODO|-|false|
 
 
 
@@ -152,18 +152,18 @@
 
 > 自定义类型
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|id|int|TODO|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|id|int|number/string|TODO|-|false|
 
 
 <h3 id="embed">Embed</h3>
 
 > 自定义类型
 
-|字段|类型|说明|默认值|是否必传|
-|---|---|---|---|---|
-|id|int| response id|-|false|
+|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
+|---|---|---|---|---|---|
+|id|int|number/string| response id|-|false|
 
 
 

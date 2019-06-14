@@ -31,11 +31,12 @@ type EnumDoc struct {
 }
 
 type MessageDocField struct {
-	Name     string
-	Comment  string
-	Type     string
-	Default  string
-	Required bool
+	Name      string
+	Comment   string
+	ProtoType string
+	JsonType  string
+	Default   string
+	Required  bool
 }
 
 type MessageDoc struct {
@@ -107,45 +108,55 @@ func (fn Func) MessageDoc(msg pgs.Message) []*MessageDocField {
 	for _, field := range msg.Fields() {
 		doc := &MessageDocField{
 			Name:     field.Name().String(),
-			Type:     field.Type().ProtoType().Proto().String(),
 			Required: field.Required(),
 		}
+		// TODO field type
+		// Any, Timestamp, Duration, Struct, Wrapper types, FieldMask, ListValue, Value, NullValue, Empty
+
 		// Type
 		switch field.Type().ProtoType() {
 		case pgs.DoubleT, pgs.FloatT:
-			doc.Type = "float"
-		case pgs.Int64T, pgs.UInt64T,
-			pgs.Int32T, pgs.UInt32T,
-			pgs.Fixed32T, pgs.Fixed64T,
-			pgs.SInt32, pgs.SInt64,
-			pgs.SFixed32, pgs.SFixed64:
-			doc.Type = "int"
+			doc.ProtoType = "float"
+			doc.JsonType = "number/string"
+		case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
+			doc.ProtoType = "int64"
+			doc.JsonType = "string"
+		case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
+			doc.ProtoType = "int"
+			doc.JsonType = "number/string"
 		case pgs.BoolT:
-			doc.Type = "bool"
+			doc.ProtoType = "bool"
+			doc.JsonType = "true, false"
 		case pgs.StringT:
-			doc.Type = "string"
+			doc.ProtoType = "string"
+			doc.JsonType = "string"
 		case pgs.BytesT:
-			doc.Type = "bytes"
+			doc.ProtoType = "bytes"
+			doc.JsonType = "base64 string"
 		case pgs.EnumT:
 			enum := field.Type().Enum()
-			doc.Type = fmt.Sprintf("[%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
+			doc.ProtoType = fmt.Sprintf("enum [%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
+			doc.JsonType = "string/integer"
 		case pgs.MessageT:
 			if field.Type().IsMap() {
 				key := fn.fieldElementType(field.Type().Key())
 				value := fn.fieldElementType(field.Type().Element())
-				doc.Type = fmt.Sprintf("map\\<%s, %s\\>", key, value)
+				doc.ProtoType = fmt.Sprintf("map\\<%s, %s\\>", key, value)
+				doc.JsonType = "object"
 			} else if field.Type().IsRepeated() {
 				el := fn.fieldElementType(field.Type().Element())
-				doc.Type = el
+				doc.ProtoType = el
+				doc.JsonType = "array"
 			} else {
 				msg := field.Type().Embed()
-				doc.Type = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
+				doc.ProtoType = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
+				doc.JsonType = "object"
 			}
 		case pgs.GroupT:
 			// TODO
 		}
 		if field.Type().IsRepeated() {
-			doc.Type += " array"
+			doc.ProtoType = fmt.Sprintf("[%s] array", doc.ProtoType)
 		}
 		// Comment
 		doc.Comment = fn.comment(field.SourceCodeInfo())
@@ -155,11 +166,87 @@ func (fn Func) MessageDoc(msg pgs.Message) []*MessageDocField {
 	return out
 }
 
-func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
-	out := map[string]map[string]interface{}{
-		Enum:    make(map[string]interface{}),
-		Message: make(map[string]interface{}),
+func (fn Func) EmbedFields(field pgs.Field, enumDoc map[string]interface{}, msgDoc map[string]interface{}) {
+	switch field.Type().ProtoType() {
+	case pgs.EnumT:
+		name := field.Type().Enum().FullyQualifiedName()
+		enumDoc[name] = &EnumDoc{
+			Enum:   field.Type().Enum(),
+			Values: fn.EnumDoc(field.Type().Enum()),
+		}
+	case pgs.MessageT:
+		if field.Type().IsMap() {
+			key := field.Type().Key()
+			value := field.Type().Element()
+			if key.IsEnum() {
+				name := key.Enum().FullyQualifiedName()
+				enumDoc[name] = &EnumDoc{
+					Enum:   key.Enum(),
+					Values: fn.EnumDoc(key.Enum()),
+				}
+			} else if key.IsEmbed() {
+				name := key.Embed().FullyQualifiedName()
+				msgDoc[name] = &MessageDoc{
+					Message: key.Embed(),
+					Fields:  fn.MessageDoc(key.Embed()),
+				}
+				for _, field := range key.Embed().Fields() {
+					fn.EmbedFields(field, enumDoc, msgDoc)
+				}
+			}
+			if value.IsEnum() {
+				name := value.Enum().FullyQualifiedName()
+				enumDoc[name] = &EnumDoc{
+					Enum:   value.Enum(),
+					Values: fn.EnumDoc(value.Enum()),
+				}
+			} else if value.IsEmbed() {
+				name := value.Embed().FullyQualifiedName()
+				msgDoc[name] = &MessageDoc{
+					Message: value.Embed(),
+					Fields:  fn.MessageDoc(value.Embed()),
+				}
+				for _, field := range value.Embed().Fields() {
+					fn.EmbedFields(field, enumDoc, msgDoc)
+				}
+			}
+		} else if field.Type().IsRepeated() {
+			el := field.Type().Element()
+			if el.IsEnum() {
+				name := el.Enum().FullyQualifiedName()
+				enumDoc[name] = &EnumDoc{
+					Enum:   el.Enum(),
+					Values: fn.EnumDoc(el.Enum()),
+				}
+			} else if el.IsEmbed() {
+				name := el.Embed().FullyQualifiedName()
+				msgDoc[name] = &MessageDoc{
+					Message: el.Embed(),
+					Fields:  fn.MessageDoc(el.Embed()),
+				}
+				for _, field := range el.Embed().Fields() {
+					fn.EmbedFields(field, enumDoc, msgDoc)
+				}
+			}
+		} else if field.Type().IsEmbed() {
+			name := field.Type().Embed().FullyQualifiedName()
+			msgDoc[name] = &MessageDoc{
+				Message: field.Type().Embed(),
+				Fields:  fn.MessageDoc(field.Type().Embed()),
+			}
+			for _, field := range field.Type().Embed().Fields() {
+				fn.EmbedFields(field, enumDoc, msgDoc)
+			}
+		}
+
+	case pgs.GroupT:
+		// TODO
 	}
+}
+
+func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
+	enumDoc := make(map[string]interface{})
+	msgDoc := make(map[string]interface{})
 
 	for _, svc := range file.Services() {
 		for _, method := range svc.Methods() {
@@ -171,74 +258,15 @@ func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
 				fields = append(fields, field)
 			}
 			for _, field := range fields {
-				switch field.Type().ProtoType() {
-				case pgs.EnumT:
-					name := field.Type().Enum().FullyQualifiedName()
-					out[Enum][name] = &EnumDoc{
-						Enum:   field.Type().Enum(),
-						Values: fn.EnumDoc(field.Type().Enum()),
-					}
-				case pgs.MessageT:
-					if field.Type().IsMap() {
-						key := field.Type().Key()
-						value := field.Type().Element()
-						if key.IsEnum() {
-							name := key.Enum().FullyQualifiedName()
-							out[Enum][name] = &EnumDoc{
-								Enum:   key.Enum(),
-								Values: fn.EnumDoc(key.Enum()),
-							}
-						} else if key.IsEmbed() {
-							name := key.Embed().FullyQualifiedName()
-							out[Message][name] = &MessageDoc{
-								Message: key.Embed(),
-								Fields:  fn.MessageDoc(key.Embed()),
-							}
-						}
-						if value.IsEnum() {
-							name := value.Enum().FullyQualifiedName()
-							out[Enum][name] = &EnumDoc{
-								Enum:   value.Enum(),
-								Values: fn.EnumDoc(value.Enum()),
-							}
-						} else if value.IsEmbed() {
-							name := value.Embed().FullyQualifiedName()
-							out[Message][name] = &MessageDoc{
-								Message: value.Embed(),
-								Fields:  fn.MessageDoc(value.Embed()),
-							}
-						}
-					} else if field.Type().IsRepeated() {
-						el := field.Type().Element()
-						if el.IsEnum() {
-							name := el.Enum().FullyQualifiedName()
-							out[Enum][name] = &EnumDoc{
-								Enum:   el.Enum(),
-								Values: fn.EnumDoc(el.Enum()),
-							}
-						} else if el.IsEmbed() {
-							name := el.Embed().FullyQualifiedName()
-							out[Message][name] = &MessageDoc{
-								Message: el.Embed(),
-								Fields:  fn.MessageDoc(el.Embed()),
-							}
-						}
-					} else if field.Type().IsEmbed() {
-						name := field.Type().Embed().FullyQualifiedName()
-						out[Message][name] = &MessageDoc{
-							Message: field.Type().Embed(),
-							Fields:  fn.MessageDoc(field.Type().Embed()),
-						}
-					}
-
-				case pgs.GroupT:
-					// TODO
-				}
+				fn.EmbedFields(field, enumDoc, msgDoc)
 			}
 		}
 	}
 
-	return out
+	return map[string]map[string]interface{}{
+		Enum:    enumDoc,
+		Message: msgDoc,
+	}
 }
 
 type TOCElement struct {
