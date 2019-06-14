@@ -1,7 +1,7 @@
-package grpc
+package markdown
 
 const serviceTpl = `
-<h2 id="{{ .FullyQualifiedName }}"> {{ .Name.UpperCamelCase }} </h2>
+<h2 id="{{ anchor .Name }}">{{ .Name.UpperCamelCase }}</h2>
 
 > {{ .SourceCodeInfo.LeadingComments }}
 

@@ -8,6 +8,7 @@ import (
 
 const (
 	MarkdownGenerator = "markdown"
+	ReadmeParam       = "readme"
 )
 
 type Auth struct {
@@ -31,6 +32,8 @@ func (m *Auth) Name() string {
 }
 
 func (m *Auth) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Package) []pgs.Artifact {
+	readme := m.Parameters().Str(ReadmeParam)
+
 	// Process file-level templates
 	tpls := templates.Template(m.Parameters())
 
@@ -48,6 +51,14 @@ func (m *Auth) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Package)
 				m.AddGeneratorTemplateFile(out.String(), tpl, f)
 			}
 		}
+
+		m.Pop()
+	}
+
+	if readme != "" {
+		m.Push("readme")
+
+		//m.AddGeneratorTemplateFile(readme, tpl, targets)
 
 		m.Pop()
 	}

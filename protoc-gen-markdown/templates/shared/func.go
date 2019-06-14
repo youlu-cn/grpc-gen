@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/proto"
 	pgs "github.com/lyft/protoc-gen-star"
 	pgsgo "github.com/lyft/protoc-gen-star/lang/go"
+	"google.golang.org/genproto/googleapis/api/annotations"
 )
 
 const (
@@ -41,6 +43,10 @@ type MessageDoc struct {
 	Fields []*MessageDocField
 }
 
+func (fn Func) Anchor(name pgs.Name) string {
+	return name.Transform(strings.ToLower, strings.ToLower, "").String()
+}
+
 func (fn Func) comment(info pgs.SourceCodeInfo) string {
 	comment := "TODO"
 	if info.TrailingComments() != "" {
@@ -55,10 +61,10 @@ func (fn Func) comment(info pgs.SourceCodeInfo) string {
 func (fn Func) fieldElementType(el pgs.FieldTypeElem) string {
 	if el.IsEmbed() {
 		msg := el.Embed()
-		return fmt.Sprintf("[%s](#%s)", msg.Name(), msg.FullyQualifiedName())
+		return fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
 	} else if el.IsEnum() {
 		enum := el.Enum()
-		return fmt.Sprintf("[%s](#%s)", enum.Name(), enum.FullyQualifiedName())
+		return fmt.Sprintf("[%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
 	}
 
 	switch el.ProtoType() {
@@ -122,15 +128,18 @@ func (fn Func) MessageDoc(msg pgs.Message) []*MessageDocField {
 			doc.Type = "bytes"
 		case pgs.EnumT:
 			enum := field.Type().Enum()
-			doc.Type = fmt.Sprintf("[%s](#%s)", enum.Name(), enum.FullyQualifiedName())
+			doc.Type = fmt.Sprintf("[%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
 		case pgs.MessageT:
 			if field.Type().IsMap() {
 				key := fn.fieldElementType(field.Type().Key())
 				value := fn.fieldElementType(field.Type().Element())
 				doc.Type = fmt.Sprintf("map\\<%s, %s\\>", key, value)
+			} else if field.Type().IsRepeated() {
+				el := fn.fieldElementType(field.Type().Element())
+				doc.Type = el
 			} else {
 				msg := field.Type().Embed()
-				doc.Type = fmt.Sprintf("[%s](#%s)", msg.Name(), msg.FullyQualifiedName())
+				doc.Type = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
 			}
 		case pgs.GroupT:
 			// TODO
@@ -199,7 +208,22 @@ func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
 								Fields:  fn.MessageDoc(value.Embed()),
 							}
 						}
-					} else {
+					} else if field.Type().IsRepeated() {
+						el := field.Type().Element()
+						if el.IsEnum() {
+							name := el.Enum().FullyQualifiedName()
+							out[Enum][name] = &EnumDoc{
+								Enum:   el.Enum(),
+								Values: fn.EnumDoc(el.Enum()),
+							}
+						} else if el.IsEmbed() {
+							name := el.Embed().FullyQualifiedName()
+							out[Message][name] = &MessageDoc{
+								Message: el.Embed(),
+								Fields:  fn.MessageDoc(el.Embed()),
+							}
+						}
+					} else if field.Type().IsEmbed() {
 						name := field.Type().Embed().FullyQualifiedName()
 						out[Message][name] = &MessageDoc{
 							Message: field.Type().Embed(),
@@ -218,10 +242,10 @@ func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
 }
 
 type TOCElement struct {
-	Interface  bool
-	Name       string
-	AnchorName string
-	Comment    string
+	Interface bool
+	Name      pgs.Name
+	Gateway   string
+	Comment   string
 }
 
 func (fn Func) TableOfContent(file pgs.File) []*TOCElement {
@@ -229,18 +253,45 @@ func (fn Func) TableOfContent(file pgs.File) []*TOCElement {
 
 	for _, svc := range file.Services() {
 		out = append(out, &TOCElement{
-			Interface:  false,
-			Name:       svc.Name().String(),
-			AnchorName: svc.FullyQualifiedName(),
-			Comment:    fn.comment(svc.SourceCodeInfo()),
+			Interface: false,
+			Name:      svc.Name(),
+			Comment:   fn.comment(svc.SourceCodeInfo()),
 		})
 		for _, method := range svc.Methods() {
-			out = append(out, &TOCElement{
-				Interface:  true,
-				Name:       method.Name().String(),
-				AnchorName: method.FullyQualifiedName(),
-				Comment:    fn.comment(method.SourceCodeInfo()),
-			})
+			el := &TOCElement{
+				Interface: true,
+				Name:      method.Name(),
+				Comment:   fn.comment(method.SourceCodeInfo()),
+			}
+
+			opts := method.Descriptor().GetOptions()
+			descs, _ := proto.ExtensionDescs(opts)
+
+			for _, desc := range descs {
+				// 72295728 gRPC gateway
+				if desc.Field == 72295728 {
+					ext, _ := proto.GetExtension(opts, desc)
+					if rule, ok := ext.(*annotations.HttpRule); ok {
+						switch p := rule.Pattern.(type) {
+						case *annotations.HttpRule_Get:
+							el.Gateway = p.Get
+						case *annotations.HttpRule_Put:
+							el.Gateway = p.Put
+						case *annotations.HttpRule_Post:
+							el.Gateway = p.Post
+						case *annotations.HttpRule_Delete:
+							el.Gateway = p.Delete
+						case *annotations.HttpRule_Patch:
+							el.Gateway = p.Patch
+						case *annotations.HttpRule_Custom:
+							el.Gateway = p.Custom.Path
+						}
+						break
+					}
+				}
+			}
+
+			out = append(out, el)
 		}
 	}
 

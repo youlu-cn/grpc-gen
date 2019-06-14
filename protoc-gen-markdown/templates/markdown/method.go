@@ -1,7 +1,7 @@
-package grpc
+package markdown
 
 const methodTpl = `
-<h3 id="{{ .FullyQualifiedName }}"> {{ .Name.UpperCamelCase }} </h3>
+<h3 id="{{ anchor .Name }}">{{ .Name.UpperCamelCase }}</h3>
 
 > {{ .SourceCodeInfo.LeadingComments }}
 

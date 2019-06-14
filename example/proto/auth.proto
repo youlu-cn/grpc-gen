@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package example;
 
+import "common.proto";
 import "auth/annotations.proto";
 import "google/api/annotations.proto";
 
@@ -30,6 +31,7 @@ message Response {
     }
 
     Embed embed = 1; // embed message
+    External ex = 2;
 }
 
 // Example Service.

@@ -1,4 +1,4 @@
-package gateway
+package readme
 
 const fileTpl = `
 `

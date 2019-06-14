@@ -14,6 +14,7 @@ func Register(tpl *template.Template, params pgs.Parameters) {
 
 	tpl.Funcs(map[string]interface{}{
 		"pkg":           fn.PackageName,
+		"anchor":        fn.Anchor,
 		"toc":           fn.TableOfContent,
 		"messageDoc":    fn.MessageDoc,
 		"embedMessages": fn.EmbedMessages,
