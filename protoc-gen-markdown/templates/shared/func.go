@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
@@ -71,11 +72,9 @@ func (fn Func) fieldElementType(el pgs.FieldTypeElem) string {
 	switch el.ProtoType() {
 	case pgs.DoubleT, pgs.FloatT:
 		return "float"
-	case pgs.Int64T, pgs.UInt64T,
-		pgs.Int32T, pgs.UInt32T,
-		pgs.Fixed32T, pgs.Fixed64T,
-		pgs.SInt32, pgs.SInt64,
-		pgs.SFixed32, pgs.SFixed64:
+	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
+		return "int64"
+	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
 		return "int"
 	case pgs.BoolT:
 		return "bool"
@@ -86,6 +85,84 @@ func (fn Func) fieldElementType(el pgs.FieldTypeElem) string {
 	default:
 		return "UNKNOWN"
 	}
+}
+
+func (fn Func) internalEmbedJsonType(fullyQualifiedName string) string {
+	switch fullyQualifiedName {
+	case ".google.protobuf.Timestamp":
+		return `string ("1972-01-01T10:00:20.021Z")`
+	case ".google.protobuf.Duration":
+		return `string ("1.000340012s")`
+	case ".google.protobuf.Empty":
+		return `object "{}"`
+	case ".google.protobuf.FieldMask":
+		return "string"
+	case ".google.protobuf.ListValue":
+		return "array"
+	case ".google.protobuf.DoubleValue", ".google.protobuf.FloatValue":
+		return "number/string"
+	case ".google.protobuf.Int64Value", ".google.protobuf.UInt64Value":
+		return "string"
+	case ".google.protobuf.Int32Value", ".google.protobuf.UInt32Value":
+		return "number/string"
+	case ".google.protobuf.BoolValue":
+		return "true, false"
+	case ".google.protobuf.StringValue":
+		return "string"
+	case ".google.protobuf.BytesValue":
+		return "base64 string"
+	default:
+		return "object"
+	}
+}
+
+func (fn Func) fieldType(field pgs.Field) (pbType string, jsonType string) {
+	switch field.Type().ProtoType() {
+	case pgs.DoubleT, pgs.FloatT:
+		pbType = "float"
+		jsonType = "number/string"
+	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
+		pbType = "int64"
+		jsonType = "string"
+	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
+		pbType = "int"
+		jsonType = "number/string"
+	case pgs.BoolT:
+		pbType = "bool"
+		jsonType = "true, false"
+	case pgs.StringT:
+		pbType = "string"
+		jsonType = "string"
+	case pgs.BytesT:
+		pbType = "bytes"
+		jsonType = "base64 string"
+	case pgs.EnumT:
+		enum := field.Type().Enum()
+		pbType = fmt.Sprintf("enum [%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
+		if enum.FullyQualifiedName() == ".google.protobuf.NullValue" {
+			jsonType = "null"
+		} else {
+			jsonType = "string/integer"
+		}
+	case pgs.MessageT:
+		if field.Type().IsMap() {
+			key := fn.fieldElementType(field.Type().Key())
+			value := fn.fieldElementType(field.Type().Element())
+			pbType = fmt.Sprintf("map\\<%s, %s\\>", key, value)
+			jsonType = "object"
+		} else if field.Type().IsRepeated() {
+			el := fn.fieldElementType(field.Type().Element())
+			pbType = el
+			jsonType = "array"
+		} else {
+			msg := field.Type().Embed()
+			pbType = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
+			jsonType = fn.internalEmbedJsonType(msg.FullyQualifiedName())
+		}
+	case pgs.GroupT:
+		// TODO
+	}
+	return
 }
 
 func (fn Func) EnumDoc(enum pgs.Enum) []*EnumDocValue {
@@ -110,53 +187,10 @@ func (fn Func) MessageDoc(msg pgs.Message) []*MessageDocField {
 			Name:     field.Name().String(),
 			Required: field.Required(),
 		}
-		// TODO field type
-		// Any, Timestamp, Duration, Struct, Wrapper types, FieldMask, ListValue, Value, NullValue, Empty
-
 		// Type
-		switch field.Type().ProtoType() {
-		case pgs.DoubleT, pgs.FloatT:
-			doc.ProtoType = "float"
-			doc.JsonType = "number/string"
-		case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
-			doc.ProtoType = "int64"
-			doc.JsonType = "string"
-		case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
-			doc.ProtoType = "int"
-			doc.JsonType = "number/string"
-		case pgs.BoolT:
-			doc.ProtoType = "bool"
-			doc.JsonType = "true, false"
-		case pgs.StringT:
-			doc.ProtoType = "string"
-			doc.JsonType = "string"
-		case pgs.BytesT:
-			doc.ProtoType = "bytes"
-			doc.JsonType = "base64 string"
-		case pgs.EnumT:
-			enum := field.Type().Enum()
-			doc.ProtoType = fmt.Sprintf("enum [%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
-			doc.JsonType = "string/integer"
-		case pgs.MessageT:
-			if field.Type().IsMap() {
-				key := fn.fieldElementType(field.Type().Key())
-				value := fn.fieldElementType(field.Type().Element())
-				doc.ProtoType = fmt.Sprintf("map\\<%s, %s\\>", key, value)
-				doc.JsonType = "object"
-			} else if field.Type().IsRepeated() {
-				el := fn.fieldElementType(field.Type().Element())
-				doc.ProtoType = el
-				doc.JsonType = "array"
-			} else {
-				msg := field.Type().Embed()
-				doc.ProtoType = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
-				doc.JsonType = "object"
-			}
-		case pgs.GroupT:
-			// TODO
-		}
+		doc.ProtoType, doc.JsonType = fn.fieldType(field)
 		if field.Type().IsRepeated() {
-			doc.ProtoType = fmt.Sprintf("[%s] array", doc.ProtoType)
+			doc.ProtoType = fmt.Sprintf("array [%s]", doc.ProtoType)
 		}
 		// Comment
 		doc.Comment = fn.comment(field.SourceCodeInfo())
@@ -324,4 +358,174 @@ func (fn Func) TableOfContent(file pgs.File) []*TOCElement {
 	}
 
 	return out
+}
+
+type GatewayDoc struct {
+	URL          string
+	Method       string
+	ContentType  string
+	DemoRequired bool
+}
+
+func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
+	opts := method.Descriptor().GetOptions()
+	descs, _ := proto.ExtensionDescs(opts)
+
+	for _, desc := range descs {
+		// 72295728 gRPC gateway
+		if desc.Field == 72295728 {
+			ext, _ := proto.GetExtension(opts, desc)
+			if rule, ok := ext.(*annotations.HttpRule); ok {
+				doc := &GatewayDoc{
+					ContentType:  "`application/json`",
+					DemoRequired: false,
+				}
+				switch p := rule.Pattern.(type) {
+				case *annotations.HttpRule_Get:
+					doc.Method = fmt.Sprintf("`%s`", http.MethodGet)
+					doc.URL = fmt.Sprintf("`%s`", p.Get)
+				case *annotations.HttpRule_Put:
+					doc.Method = fmt.Sprintf("`%s`", http.MethodPut)
+					doc.URL = fmt.Sprintf("`%s`", p.Put)
+					doc.DemoRequired = true
+				case *annotations.HttpRule_Post:
+					doc.Method = fmt.Sprintf("`%s`", http.MethodPost)
+					doc.URL = fmt.Sprintf("`%s`", p.Post)
+					doc.DemoRequired = true
+				case *annotations.HttpRule_Delete:
+					doc.Method = fmt.Sprintf("`%s`", http.MethodDelete)
+					doc.URL = fmt.Sprintf("`%s`", p.Delete)
+				case *annotations.HttpRule_Patch:
+					doc.Method = fmt.Sprintf("`%s`", http.MethodPatch)
+					doc.URL = fmt.Sprintf("`%s`", p.Patch)
+				case *annotations.HttpRule_Custom:
+					doc.Method = fmt.Sprintf("`%s`", p.Custom.Kind)
+					doc.URL = fmt.Sprintf("`%s`", p.Custom.Path)
+				}
+				return doc
+			}
+		}
+	}
+
+	return nil
+}
+
+func (fn Func) fieldElementJson(el pgs.FieldTypeElem, mapKey bool) string {
+	if el.IsEmbed() {
+		return fn.MessageJSON(el.Embed())
+	} else if el.IsEnum() {
+		return fmt.Sprintf(`"%s"`, el.Enum().Values()[0].Name())
+	}
+
+	switch el.ProtoType() {
+	case pgs.DoubleT, pgs.FloatT:
+		if mapKey {
+			return `"3.1415926"`
+		} else {
+			return "3.1415926"
+		}
+	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
+		return `"1560609550399123098"`
+	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
+		if mapKey {
+			return `"9"`
+		} else {
+			return "9"
+		}
+	case pgs.BoolT:
+		if mapKey {
+			return `"true"`
+		} else {
+			return "true"
+		}
+	case pgs.StringT:
+		return `"hello"`
+	case pgs.BytesT:
+		return `"ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="`
+	default:
+		return `"UNKNOWN"`
+	}
+}
+
+func (fn Func) internalEmbedJson(fullyQualifiedName string) string {
+	switch fullyQualifiedName {
+	case ".google.protobuf.Timestamp":
+		return `"1972-01-01T10:00:20.021Z"`
+	case ".google.protobuf.Duration":
+		return `"1.000340012s"`
+	case ".google.protobuf.Empty":
+		return `"{}"`
+	case ".google.protobuf.FieldMask":
+		return `"f.fooBar,h"`
+	case ".google.protobuf.ListValue":
+		return `["foo", "bar"]`
+	case ".google.protobuf.DoubleValue", ".google.protobuf.FloatValue":
+		return `3.1415926`
+	case ".google.protobuf.Int64Value", ".google.protobuf.UInt64Value":
+		return `"1560609550399123098"`
+	case ".google.protobuf.Int32Value", ".google.protobuf.UInt32Value":
+		return "0"
+	case ".google.protobuf.BoolValue":
+		return "true"
+	case ".google.protobuf.StringValue":
+		return `"hello world"`
+	case ".google.protobuf.BytesValue":
+		return "ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="
+	default:
+		return "{}"
+	}
+}
+
+func (fn Func) fieldJson(field pgs.Field) string {
+	switch field.Type().ProtoType() {
+	case pgs.DoubleT, pgs.FloatT:
+		return `3.1415926`
+	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
+		return `"1560609550399123098"`
+	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
+		return "0"
+	case pgs.BoolT:
+		return "true"
+	case pgs.StringT:
+		return `"hello world"`
+	case pgs.BytesT:
+		return `"ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="`
+	case pgs.EnumT:
+		enum := field.Type().Enum()
+		return fmt.Sprintf(`"%s"`, enum.Values()[0].Name())
+	case pgs.MessageT:
+		if field.Type().IsMap() {
+			key := fn.fieldElementJson(field.Type().Key(), true)
+			value := fn.fieldElementJson(field.Type().Element(), false)
+			return fmt.Sprintf(`{%s:%s}`, key, value)
+		} else if field.Type().IsRepeated() {
+			el := fn.fieldElementJson(field.Type().Element(), false)
+			return fmt.Sprintf(`[%s]`, el)
+		} else {
+			return fn.MessageJSON(field.Type().Embed())
+		}
+	// TODO
+	//case pgs.GroupT:
+	default:
+		return ""
+	}
+}
+
+func (fn Func) MessageJSON(message pgs.Message) string {
+	var lines []string
+
+	for _, field := range message.Fields() {
+		val := fn.fieldJson(field)
+		if field.Type().IsRepeated() {
+			val = fmt.Sprintf(`[%s]`, val)
+		}
+		lines = append(lines, fmt.Sprintf(`"%s":%s`, field.Name(), val))
+	}
+
+	return fmt.Sprintf(`{%s}`, strings.Join(lines, ","))
+}
+
+func (fn Func) JSONDemo(message pgs.Message) string {
+	jsonVal := fn.MessageJSON(message)
+	return fmt.Sprintf("```json\n%s\n```", jsonVal)
 }

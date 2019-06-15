@@ -19,6 +19,8 @@ const fileTpl = `
 {{ template "service" . }}
 {{ end }}
 
+********
+
 ## *Embed Messages*
 
 {{ range $type, $m := (embedMessages .) }}
@@ -44,12 +46,14 @@ const fileTpl = `
 
 > {{ $t.SourceCodeInfo.LeadingComments }}
 
-* 自定义类型
+* protobuf 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 {{ range $v := $t.Fields }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|-|{{ $v.Required }}|
 {{ end }}
+
+* JSON 示例
 {{ end }}
 
 {{ end }}

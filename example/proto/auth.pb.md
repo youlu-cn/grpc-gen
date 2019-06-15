@@ -41,24 +41,42 @@
 >  test1 comment
 
 
-* 请求类型: ***Request***
+
+
+* 请求参数
+
+> gRPC object 类型: ***Request***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string| leading comment<br> 2rd comment line|-|false|
 |name|string|string|TODO|-|false|
 |type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
-|array|[string] array|string| string array|-|false|
+|array|array [string]|string| string array|-|false|
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-* 返回类型: ***Response***
+> JSON 示例
+
+```json
+{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
+```
+
+* 返回值
+
+> gRPC object 类型: ***Response***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |embed|[Embed](#embed)|object| embed message|-|false|
 |ex|[External](#external)|object|TODO|-|false|
 
+
+> JSON 示例
+
+```json
+{"embed":{"id":0},"ex":{"id":0}}
+```
 
 
 
@@ -76,24 +94,48 @@
 >  test2 comment
 
 
-* 请求类型: ***Request***
+
+
+* HTTP Gateway
+
+	* URL: `/example/test`
+	* Method: `GET`
+	* Content-Type: `application/json`
+
+* 请求参数
+
+> gRPC object 类型: ***Request***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string| leading comment<br> 2rd comment line|-|false|
 |name|string|string|TODO|-|false|
 |type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
-|array|[string] array|string| string array|-|false|
+|array|array [string]|string| string array|-|false|
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-* 返回类型: ***Response***
+> JSON 示例
+
+```json
+{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
+```
+
+* 返回值
+
+> gRPC object 类型: ***Response***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |embed|[Embed](#embed)|object| embed message|-|false|
 |ex|[External](#external)|object|TODO|-|false|
 
+
+> JSON 示例
+
+```json
+{"embed":{"id":0},"ex":{"id":0}}
+```
 
 
 
@@ -102,18 +144,30 @@
 >  test3 interface
 
 
-* 请求类型: ***Request***
+
+
+* 请求参数
+
+> gRPC object 类型: ***Request***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string| leading comment<br> 2rd comment line|-|false|
 |name|string|string|TODO|-|false|
 |type|enum [RequestType](#requesttype)|string/integer| enum field|-|false|
-|array|[string] array|string| string array|-|false|
+|array|array [string]|string| string array|-|false|
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-* 返回类型: ***Response***
+> JSON 示例
+
+```json
+{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
+```
+
+* 返回值
+
+> gRPC object 类型: ***Response***
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
@@ -121,9 +175,17 @@
 |ex|[External](#external)|object|TODO|-|false|
 
 
+> JSON 示例
+
+```json
+{"embed":{"id":0},"ex":{"id":0}}
+```
 
 
 
+
+
+********
 
 ## *Embed Messages*
 
@@ -133,9 +195,11 @@
 
 <h3 id="requesttype">RequestType</h3>
 
-> 枚举类型
+> 
 
-|取值|对应数值|说明|
+* 枚举类型
+
+|枚举名称 (string)|枚举数值 (integer)|说明|
 |---|---|---|
 |_NONE|0|TODO|
 |TYPE1|1| request type 1|
@@ -150,21 +214,29 @@
 
 <h3 id="external">External</h3>
 
-> 自定义类型
+> 
+
+* protobuf 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string|TODO|-|false|
 
 
+* JSON 示例
+
 <h3 id="embed">Embed</h3>
 
-> 自定义类型
+> 
+
+* protobuf 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string| response id|-|false|
 
+
+* JSON 示例
 
 
 

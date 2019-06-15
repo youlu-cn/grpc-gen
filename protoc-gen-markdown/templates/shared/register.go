@@ -16,7 +16,9 @@ func Register(tpl *template.Template, params pgs.Parameters) {
 		"pkg":           fn.PackageName,
 		"anchor":        fn.Anchor,
 		"toc":           fn.TableOfContent,
+		"gatewayDoc":    fn.GatewayDoc,
 		"messageDoc":    fn.MessageDoc,
 		"embedMessages": fn.EmbedMessages,
+		"jsonDemo":      fn.JSONDemo,
 	})
 }
