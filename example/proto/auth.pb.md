@@ -56,11 +56,7 @@
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-> JSON 示例
 
-```json
-{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
-```
 
 * 返回值
 
@@ -72,11 +68,7 @@
 |ex|[External](#external)|object|TODO|-|false|
 
 
-> JSON 示例
 
-```json
-{"embed":{"id":0},"ex":{"id":0}}
-```
 
 
 
@@ -115,11 +107,9 @@
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-> JSON 示例
 
-```json
-{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
-```
+
+
 
 * 返回值
 
@@ -131,11 +121,20 @@
 |ex|[External](#external)|object|TODO|-|false|
 
 
+
 > JSON 示例
 
 ```json
-{"embed":{"id":0},"ex":{"id":0}}
+{
+	"embed": {
+		"id": 0
+	},
+	"ex": {
+		"id": 0
+	}
+}
 ```
+
 
 
 
@@ -159,11 +158,7 @@
 |map|map\<string, [RequestType](#requesttype)\>|object| map field|-|false|
 
 
-> JSON 示例
 
-```json
-{"id":0,"name":"hello world","type":"_NONE","array":["hello world","hello world"],"map":{"hello":"_NONE"}}
-```
 
 * 返回值
 
@@ -175,11 +170,7 @@
 |ex|[External](#external)|object|TODO|-|false|
 
 
-> JSON 示例
 
-```json
-{"embed":{"id":0},"ex":{"id":0}}
-```
 
 
 
@@ -216,27 +207,23 @@
 
 > 
 
-* protobuf 自定义类型
+* 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string|TODO|-|false|
 
 
-* JSON 示例
-
 <h3 id="embed">Embed</h3>
 
 > 
 
-* protobuf 自定义类型
+* 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |id|int|number/string| response id|-|false|
 
-
-* JSON 示例
 
 
 

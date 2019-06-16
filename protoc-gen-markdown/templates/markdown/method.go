@@ -22,9 +22,13 @@ const methodTpl = `
 {{ range $v := (messageDoc .Input) }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|-|{{ $v.Required }}|
 {{ end }}
 
+{{ if $gateway }}
+{{ if $gateway.JsonRequired }}
 > JSON 示例
 
 {{ (jsonDemo .Input) }}
+{{ end }}
+{{ end }}
 
 * 返回值
 
@@ -35,7 +39,9 @@ const methodTpl = `
 {{ range $v := (messageDoc .Output) }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|-|{{ $v.Required }}|
 {{ end }}
 
+{{ if $gateway }}
 > JSON 示例
 
 {{ (jsonDemo .Output) }}
+{{ end }}
 `

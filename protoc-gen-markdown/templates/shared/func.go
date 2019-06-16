@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -66,6 +68,9 @@ func (fn Func) fieldElementType(el pgs.FieldTypeElem) string {
 		return fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
 	} else if el.IsEnum() {
 		enum := el.Enum()
+		if enum.FullyQualifiedName() == ".google.protobuf.NullValue" {
+			return "null"
+		}
 		return fmt.Sprintf("[%s](#%s)", enum.Name(), fn.Anchor(enum.Name()))
 	}
 
@@ -364,7 +369,7 @@ type GatewayDoc struct {
 	URL          string
 	Method       string
 	ContentType  string
-	DemoRequired bool
+	JsonRequired bool
 }
 
 func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
@@ -378,7 +383,6 @@ func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
 			if rule, ok := ext.(*annotations.HttpRule); ok {
 				doc := &GatewayDoc{
 					ContentType:  "`application/json`",
-					DemoRequired: false,
 				}
 				switch p := rule.Pattern.(type) {
 				case *annotations.HttpRule_Get:
@@ -387,11 +391,11 @@ func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
 				case *annotations.HttpRule_Put:
 					doc.Method = fmt.Sprintf("`%s`", http.MethodPut)
 					doc.URL = fmt.Sprintf("`%s`", p.Put)
-					doc.DemoRequired = true
+					doc.JsonRequired = true
 				case *annotations.HttpRule_Post:
 					doc.Method = fmt.Sprintf("`%s`", http.MethodPost)
 					doc.URL = fmt.Sprintf("`%s`", p.Post)
-					doc.DemoRequired = true
+					doc.JsonRequired = true
 				case *annotations.HttpRule_Delete:
 					doc.Method = fmt.Sprintf("`%s`", http.MethodDelete)
 					doc.URL = fmt.Sprintf("`%s`", p.Delete)
@@ -410,11 +414,24 @@ func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
 	return nil
 }
 
+func (fn Func) enumJson(enum pgs.Enum) string {
+	var val []string
+
+	for _, v := range enum.Values() {
+		val = append(val, v.Name().String())
+	}
+
+	return strings.Join(val, " | ")
+}
+
 func (fn Func) fieldElementJson(el pgs.FieldTypeElem, mapKey bool) string {
 	if el.IsEmbed() {
-		return fn.MessageJSON(el.Embed())
+		return fn.messageJson(el.Embed())
 	} else if el.IsEnum() {
-		return fmt.Sprintf(`"%s"`, el.Enum().Values()[0].Name())
+		if el.Enum().FullyQualifiedName() == ".google.protobuf.NullValue" {
+			return "null"
+		}
+		return fmt.Sprintf(`"%s"`, fn.enumJson(el.Enum()))
 	}
 
 	switch el.ProtoType() {
@@ -425,12 +442,12 @@ func (fn Func) fieldElementJson(el pgs.FieldTypeElem, mapKey bool) string {
 			return "3.1415926"
 		}
 	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
-		return `"1560609550399123098"`
+		return `"string($int64)"`
 	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
 		if mapKey {
-			return `"9"`
+			return `"0"`
 		} else {
-			return "9"
+			return "0"
 		}
 	case pgs.BoolT:
 		if mapKey {
@@ -439,16 +456,16 @@ func (fn Func) fieldElementJson(el pgs.FieldTypeElem, mapKey bool) string {
 			return "true"
 		}
 	case pgs.StringT:
-		return `"hello"`
+		return `"string"`
 	case pgs.BytesT:
-		return `"ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="`
+		return `"YmFzZTY0IHN0cmluZw=="`
 	default:
 		return `"UNKNOWN"`
 	}
 }
 
-func (fn Func) internalEmbedJson(fullyQualifiedName string) string {
-	switch fullyQualifiedName {
+func (fn Func) embedJson(message pgs.Message) string {
+	switch message.FullyQualifiedName() {
 	case ".google.protobuf.Timestamp":
 		return `"1972-01-01T10:00:20.021Z"`
 	case ".google.protobuf.Duration":
@@ -462,17 +479,17 @@ func (fn Func) internalEmbedJson(fullyQualifiedName string) string {
 	case ".google.protobuf.DoubleValue", ".google.protobuf.FloatValue":
 		return `3.1415926`
 	case ".google.protobuf.Int64Value", ".google.protobuf.UInt64Value":
-		return `"1560609550399123098"`
+		return `"string($int64)"`
 	case ".google.protobuf.Int32Value", ".google.protobuf.UInt32Value":
 		return "0"
 	case ".google.protobuf.BoolValue":
 		return "true"
 	case ".google.protobuf.StringValue":
-		return `"hello world"`
+		return `"string"`
 	case ".google.protobuf.BytesValue":
-		return "ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="
+		return `"YmFzZTY0IHN0cmluZw=="`
 	default:
-		return "{}"
+		return fn.messageJson(message)
 	}
 }
 
@@ -481,28 +498,30 @@ func (fn Func) fieldJson(field pgs.Field) string {
 	case pgs.DoubleT, pgs.FloatT:
 		return `3.1415926`
 	case pgs.Int64T, pgs.UInt64T, pgs.SInt64, pgs.Fixed64T, pgs.SFixed64:
-		return `"1560609550399123098"`
+		return `"string($int64)"`
 	case pgs.Int32T, pgs.UInt32T, pgs.Fixed32T, pgs.SInt32, pgs.SFixed32:
 		return "0"
 	case pgs.BoolT:
 		return "true"
 	case pgs.StringT:
-		return `"hello world"`
+		return `"string"`
 	case pgs.BytesT:
-		return `"ZmRhZmRzbGtmZHNhbDtmamRza2w7ZmpsO2RzYWY="`
+		return `"YmFzZTY0IHN0cmluZw=="`
 	case pgs.EnumT:
 		enum := field.Type().Enum()
-		return fmt.Sprintf(`"%s"`, enum.Values()[0].Name())
+		if enum.FullyQualifiedName() == ".google.protobuf.NullValue" {
+			return "null"
+		}
+		return fmt.Sprintf(`"%s"`, fn.enumJson(enum))
 	case pgs.MessageT:
 		if field.Type().IsMap() {
 			key := fn.fieldElementJson(field.Type().Key(), true)
 			value := fn.fieldElementJson(field.Type().Element(), false)
 			return fmt.Sprintf(`{%s:%s}`, key, value)
 		} else if field.Type().IsRepeated() {
-			el := fn.fieldElementJson(field.Type().Element(), false)
-			return fmt.Sprintf(`[%s]`, el)
+			return fn.fieldElementJson(field.Type().Element(), false)
 		} else {
-			return fn.MessageJSON(field.Type().Embed())
+			return fn.embedJson(field.Type().Embed())
 		}
 	// TODO
 	//case pgs.GroupT:
@@ -511,7 +530,7 @@ func (fn Func) fieldJson(field pgs.Field) string {
 	}
 }
 
-func (fn Func) MessageJSON(message pgs.Message) string {
+func (fn Func) messageJson(message pgs.Message) string {
 	var lines []string
 
 	for _, field := range message.Fields() {
@@ -526,6 +545,10 @@ func (fn Func) MessageJSON(message pgs.Message) string {
 }
 
 func (fn Func) JSONDemo(message pgs.Message) string {
-	jsonVal := fn.MessageJSON(message)
-	return fmt.Sprintf("```json\n%s\n```", jsonVal)
+	var prettyJSON bytes.Buffer
+	jsonVal := fn.messageJson(message)
+	if err := json.Indent(&prettyJSON, []byte(jsonVal), "", "\t"); err != nil {
+		return "json.Indent err:" + err.Error()
+	}
+	return fmt.Sprintf("```json\n%s\n```", string(prettyJSON.Bytes()))
 }

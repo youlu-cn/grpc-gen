@@ -46,14 +46,12 @@ const fileTpl = `
 
 > {{ $t.SourceCodeInfo.LeadingComments }}
 
-* protobuf 自定义类型
+* 自定义类型
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 {{ range $v := $t.Fields }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|-|{{ $v.Required }}|
 {{ end }}
-
-* JSON 示例
 {{ end }}
 
 {{ end }}
