@@ -16,8 +16,6 @@ func AccessLevelOfExample(fullPath string) auth.AccessLevel {
 }
 
 // Register scoped gRPC server.
-// Example Service.
-
 func RegisterExampleScopeServer(s auth.Service, srv interface{}) {
 	for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_PUBLIC_SCOPE) {
 		grpc.RegisterService(&_Example_serviceDesc, srv)
@@ -25,8 +23,6 @@ func RegisterExampleScopeServer(s auth.Service, srv interface{}) {
 }
 
 // Register scoped gateway handler.
-// Example Service.
-
 func RegisterExampleScopeHandler(s auth.Service) error {
 	// No gateway generated.
 	return nil
@@ -43,8 +39,6 @@ func AccessLevelOfExample2(fullPath string) auth.AccessLevel {
 }
 
 // Register scoped gRPC server.
-// Example2 Service.
-
 func RegisterExample2ScopeServer(s auth.Service, srv interface{}) {
 	for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_ALL_SCOPE) {
 		grpc.RegisterService(&_Example2_serviceDesc, srv)
@@ -52,8 +46,6 @@ func RegisterExample2ScopeServer(s auth.Service, srv interface{}) {
 }
 
 // Register scoped gateway handler.
-// Example2 Service.
-
 func RegisterExample2ScopeHandler(s auth.Service) error {
 	return s.RegisterGateway(auth.VisibleScope_ALL_SCOPE, RegisterExample2Handler)
 

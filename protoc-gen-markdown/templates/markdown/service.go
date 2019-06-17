@@ -3,7 +3,7 @@ package markdown
 const serviceTpl = `
 <h2 id="{{ anchor .Name }}">{{ .Name.UpperCamelCase }}</h2>
 
-> {{ .SourceCodeInfo.LeadingComments }}
+> {{ leadingComment .SourceCodeInfo }}
 
 {{ range .Methods }}
 {{ template "method" . }}

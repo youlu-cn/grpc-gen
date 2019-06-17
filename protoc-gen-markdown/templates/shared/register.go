@@ -13,12 +13,14 @@ func Register(tpl *template.Template, params pgs.Parameters) {
 	}
 
 	tpl.Funcs(map[string]interface{}{
-		"pkg":           fn.PackageName,
-		"anchor":        fn.Anchor,
-		"toc":           fn.TableOfContent,
-		"gatewayDoc":    fn.GatewayDoc,
-		"messageDoc":    fn.MessageDoc,
-		"embedMessages": fn.EmbedMessages,
-		"jsonDemo":      fn.JSONDemo,
+		"pkg":            fn.PackageName,
+		"anchor":         fn.Anchor,
+		"toc":            fn.TableOfContent,
+		"gatewayDoc":     fn.GatewayDoc,
+		"messageDoc":     fn.MessageDoc,
+		"embedMessages":  fn.EmbedMessages,
+		"tocComment":     fn.TOCComment,
+		"leadingComment": fn.LeadingComment,
+		"jsonDemo":       fn.JSONDemo,
 	})
 }

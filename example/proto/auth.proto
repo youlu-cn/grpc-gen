@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package example;
 
@@ -18,23 +18,26 @@ message Request {
     // leading comment
     // 2rd comment line
     //
-    int32 id = 1;
-    string name = 2;
-    RequestType type = 3; // enum field
+    required int32 id = 1;
+    optional string name = 2 [default="abc"];
+    optional RequestType type = 3; // enum field
     repeated string array = 4; // string array
     map<string, RequestType> map = 5; // map field
 }
 
 message Response {
     message Embed {
-        int32 id = 1; // response id
+        optional int32 id = 1; // response id
     }
 
-    Embed embed = 1; // embed message
-    External ex = 2;
+    optional Embed embed = 1; // embed message
+    optional External ex = 2;
 }
 
 // Example Service.
+//
+// # markdown h1
+// > markdown test
 service Example {
     // service scope
     option (auth.visible) = {

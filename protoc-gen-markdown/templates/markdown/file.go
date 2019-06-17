@@ -29,9 +29,9 @@ const fileTpl = `
 {{ range $name, $t := $m }}
 <h3 id="{{ anchor $t.Name }}">{{ $t.Name.UpperCamelCase }}</h3>
 
-> {{ $t.SourceCodeInfo.LeadingComments }}
+> {{ leadingComment $t.SourceCodeInfo }}
 
-* 枚举类型
+* 枚举说明
 
 |枚举名称 (string)|枚举数值 (integer)|说明|
 |---|---|---|
@@ -44,13 +44,13 @@ const fileTpl = `
 {{ range $name, $t := $m }}
 <h3 id="{{ anchor $t.Name }}">{{ $t.Name.UpperCamelCase }}</h3>
 
-> {{ $t.SourceCodeInfo.LeadingComments }}
+> {{ leadingComment $t.SourceCodeInfo }}
 
-* 自定义类型
+* 字段说明
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
-{{ range $v := $t.Fields }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|-|{{ $v.Required }}|
+{{ range $v := $t.Fields }}|{{ $v.Name }}|{{ $v.ProtoType }}|{{ $v.JsonType }}|{{ $v.Comment }}|{{ $v.Default }}|{{ $v.Required }}|
 {{ end }}
 {{ end }}
 

@@ -16,6 +16,8 @@ import (
 const (
 	Enum    = "enum"
 	Message = "message"
+
+	TODOComment = "***TODO***"
 )
 
 type Func struct {
@@ -51,8 +53,25 @@ func (fn Func) Anchor(name pgs.Name) string {
 	return name.Transform(strings.ToLower, strings.ToLower, "").String()
 }
 
-func (fn Func) comment(info pgs.SourceCodeInfo) string {
-	comment := "TODO"
+func (fn Func) TOCComment(info pgs.SourceCodeInfo) string {
+	comment := info.LeadingComments()
+	lines := strings.Split(comment, "\n")
+	for _, line := range lines {
+		if line = strings.TrimSpace(line); line != "" {
+			return line
+		}
+	}
+	return TODOComment
+}
+
+func (fn Func) LeadingComment(info pgs.SourceCodeInfo) string {
+	comment := info.LeadingComments()
+	comment = strings.Trim(comment, "\n")
+	return strings.Replace(comment, "\n", "\n> ", -1)
+}
+
+func (fn Func) TrailingComment(info pgs.SourceCodeInfo) string {
+	comment := TODOComment
 	if info.TrailingComments() != "" {
 		comment = info.TrailingComments()
 	} else if info.LeadingComments() != "" {
@@ -177,7 +196,7 @@ func (fn Func) EnumDoc(enum pgs.Enum) []*EnumDocValue {
 		doc = append(doc, &EnumDocValue{
 			Name:    v.Name().String(),
 			Value:   v.Value(),
-			Comment: fn.comment(v.SourceCodeInfo()),
+			Comment: fn.TrailingComment(v.SourceCodeInfo()),
 		})
 	}
 
@@ -197,8 +216,13 @@ func (fn Func) MessageDoc(msg pgs.Message) []*MessageDocField {
 		if field.Type().IsRepeated() {
 			doc.ProtoType = fmt.Sprintf("array [%s]", doc.ProtoType)
 		}
+		// Default
+		doc.Default = field.Descriptor().GetDefaultValue()
+		if doc.Default == "" {
+			doc.Default = "-"
+		}
 		// Comment
-		doc.Comment = fn.comment(field.SourceCodeInfo())
+		doc.Comment = fn.TrailingComment(field.SourceCodeInfo())
 		out = append(out, doc)
 	}
 
@@ -322,13 +346,13 @@ func (fn Func) TableOfContent(file pgs.File) []*TOCElement {
 		out = append(out, &TOCElement{
 			Interface: false,
 			Name:      svc.Name(),
-			Comment:   fn.comment(svc.SourceCodeInfo()),
+			Comment:   fn.TOCComment(svc.SourceCodeInfo()),
 		})
 		for _, method := range svc.Methods() {
 			el := &TOCElement{
 				Interface: true,
 				Name:      method.Name(),
-				Comment:   fn.comment(method.SourceCodeInfo()),
+				Comment:   fn.TOCComment(method.SourceCodeInfo()),
 			}
 
 			opts := method.Descriptor().GetOptions()
@@ -382,7 +406,7 @@ func (fn Func) GatewayDoc(method pgs.Method) *GatewayDoc {
 			ext, _ := proto.GetExtension(opts, desc)
 			if rule, ok := ext.(*annotations.HttpRule); ok {
 				doc := &GatewayDoc{
-					ContentType:  "`application/json`",
+					ContentType: "`application/json`",
 				}
 				switch p := rule.Pattern.(type) {
 				case *annotations.HttpRule_Get:
@@ -547,7 +571,7 @@ func (fn Func) messageJson(message pgs.Message) string {
 func (fn Func) JSONDemo(message pgs.Message) string {
 	var prettyJSON bytes.Buffer
 	jsonVal := fn.messageJson(message)
-	if err := json.Indent(&prettyJSON, []byte(jsonVal), "", "\t"); err != nil {
+	if err := json.Indent(&prettyJSON, []byte(jsonVal), "", "  "); err != nil {
 		return "json.Indent err:" + err.Error()
 	}
 	return fmt.Sprintf("```json\n%s\n```", string(prettyJSON.Bytes()))
