@@ -2,7 +2,6 @@ syntax = "proto2";
 
 package example;
 
-import "common.proto";
 import "auth/annotations.proto";
 import "google/api/annotations.proto";
 
@@ -13,6 +12,10 @@ enum RequestType {
     TYPE2 = 2;
 }
 
+//
+//
+// Message Request type
+//
 message Request {
     //
     // leading comment
@@ -31,7 +34,12 @@ message Response {
     }
 
     optional Embed embed = 1; // embed message
-    optional External ex = 2;
+
+    oneof test_oneof {
+        string name0 = 2; // test oneof name 0
+        string name1 = 3; // test oneof name 1
+        string name2 = 4; // test oneof name 2
+    }
 }
 
 // Example Service.

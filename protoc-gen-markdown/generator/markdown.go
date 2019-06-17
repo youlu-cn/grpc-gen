@@ -8,7 +8,6 @@ import (
 
 const (
 	MarkdownGenerator = "markdown"
-	ReadmeParam       = "readme"
 )
 
 type Auth struct {
@@ -32,7 +31,9 @@ func (m *Auth) Name() string {
 }
 
 func (m *Auth) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Package) []pgs.Artifact {
-	readme := m.Parameters().Str(ReadmeParam)
+	var (
+		outDir pgs.FilePath
+	)
 
 	// Process file-level templates
 	tpls := templates.Template(m.Parameters())
@@ -48,6 +49,7 @@ func (m *Auth) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Package)
 			// implementation-specific FilePathFor implementations.
 			// Ex: Don't generate Java validators for files that don't reference PGV.
 			if out != nil {
+				outDir = out.Dir()
 				m.AddGeneratorTemplateFile(out.String(), tpl, f)
 			}
 		}
@@ -55,13 +57,15 @@ func (m *Auth) Execute(targets map[string]pgs.File, pkgs map[string]pgs.Package)
 		m.Pop()
 	}
 
-	if readme != "" {
-		m.Push("readme")
+	// Table of Content
+	tocTpl := templates.TOCTemplate(m.Parameters())
+	tocOut := pgs.JoinPaths(outDir.String(), "README.md")
 
-		//m.AddGeneratorTemplateFile(readme, tpl, targets)
+	m.Push("toc")
 
-		m.Pop()
-	}
+	m.AddGeneratorTemplateFile(tocOut.String(), tocTpl, targets)
+
+	m.Pop()
 
 	return m.Artifacts()
 }

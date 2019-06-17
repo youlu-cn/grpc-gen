@@ -183,8 +183,11 @@ func (fn Func) fieldType(field pgs.Field) (pbType string, jsonType string) {
 			pbType = fmt.Sprintf("[%s](#%s)", msg.Name(), fn.Anchor(msg.Name()))
 			jsonType = fn.internalEmbedJsonType(msg.FullyQualifiedName())
 		}
+	// TODO: deprecated
 	case pgs.GroupT:
-		// TODO
+	}
+	if field.InOneOf() {
+		pbType = fmt.Sprintf("%s (oneof %s)", pbType, field.OneOf().Name())
 	}
 	return
 }
@@ -301,9 +304,8 @@ func (fn Func) EmbedFields(field pgs.Field, enumDoc map[string]interface{}, msgD
 				fn.EmbedFields(field, enumDoc, msgDoc)
 			}
 		}
-
+	// TODO: deprecated
 	case pgs.GroupT:
-		// TODO
 	}
 }
 
@@ -332,61 +334,35 @@ func (fn Func) EmbedMessages(file pgs.File) map[string]map[string]interface{} {
 	}
 }
 
-type TOCElement struct {
-	Interface bool
-	Name      pgs.Name
-	Gateway   string
-	Comment   string
-}
+func (fn Func) GatewayURL(method pgs.Method) string {
+	opts := method.Descriptor().GetOptions()
+	descs, _ := proto.ExtensionDescs(opts)
 
-func (fn Func) TableOfContent(file pgs.File) []*TOCElement {
-	var out []*TOCElement
-
-	for _, svc := range file.Services() {
-		out = append(out, &TOCElement{
-			Interface: false,
-			Name:      svc.Name(),
-			Comment:   fn.TOCComment(svc.SourceCodeInfo()),
-		})
-		for _, method := range svc.Methods() {
-			el := &TOCElement{
-				Interface: true,
-				Name:      method.Name(),
-				Comment:   fn.TOCComment(method.SourceCodeInfo()),
-			}
-
-			opts := method.Descriptor().GetOptions()
-			descs, _ := proto.ExtensionDescs(opts)
-
-			for _, desc := range descs {
-				// 72295728 gRPC gateway
-				if desc.Field == 72295728 {
-					ext, _ := proto.GetExtension(opts, desc)
-					if rule, ok := ext.(*annotations.HttpRule); ok {
-						switch p := rule.Pattern.(type) {
-						case *annotations.HttpRule_Get:
-							el.Gateway = p.Get
-						case *annotations.HttpRule_Put:
-							el.Gateway = p.Put
-						case *annotations.HttpRule_Post:
-							el.Gateway = p.Post
-						case *annotations.HttpRule_Delete:
-							el.Gateway = p.Delete
-						case *annotations.HttpRule_Patch:
-							el.Gateway = p.Patch
-						case *annotations.HttpRule_Custom:
-							el.Gateway = p.Custom.Path
-						}
-						break
-					}
+	for _, desc := range descs {
+		// 72295728 gRPC gateway
+		if desc.Field == 72295728 {
+			ext, _ := proto.GetExtension(opts, desc)
+			if rule, ok := ext.(*annotations.HttpRule); ok {
+				switch p := rule.Pattern.(type) {
+				case *annotations.HttpRule_Get:
+					return p.Get
+				case *annotations.HttpRule_Put:
+					return p.Put
+				case *annotations.HttpRule_Post:
+					return p.Post
+				case *annotations.HttpRule_Delete:
+					return p.Delete
+				case *annotations.HttpRule_Patch:
+					return p.Patch
+				case *annotations.HttpRule_Custom:
+					return p.Custom.Path
 				}
+				break
 			}
-
-			out = append(out, el)
 		}
 	}
 
-	return out
+	return ""
 }
 
 type GatewayDoc struct {
@@ -547,7 +523,7 @@ func (fn Func) fieldJson(field pgs.Field) string {
 		} else {
 			return fn.embedJson(field.Type().Embed())
 		}
-	// TODO
+	// TODO: deprecated
 	//case pgs.GroupT:
 	default:
 		return ""

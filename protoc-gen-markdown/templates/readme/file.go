@@ -1,4 +1,0 @@
-package readme
-
-const fileTpl = `
-`

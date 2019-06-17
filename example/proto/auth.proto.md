@@ -6,21 +6,16 @@
 > 接口列表
 
 
-
 * [Example](#example) - Example Service.
-
 
 
 	* [Test1](#test1) - test1 comment
 
 
-
 * [Example2](#example2) - Example2 Service.
 
 
-
 	* [Test2 (/example/test)](#test2) - test2 comment
-
 
 
 	* [Test3](#test3) - test3 interface
@@ -46,7 +41,7 @@
 
 * 请求类型: ***Request***
 
-> 
+>  Message Request type
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
@@ -66,7 +61,9 @@
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |embed|[Embed](#embed)|object| embed message|-|false|
-|ex|[External](#external)|object|***TODO***|-|false|
+|name0|string (oneof test_oneof)|string| test oneof name 0|-|false|
+|name1|string (oneof test_oneof)|string| test oneof name 1|-|false|
+|name2|string (oneof test_oneof)|string| test oneof name 2|-|false|
 
 
 
@@ -95,7 +92,7 @@
 
 * 请求类型: ***Request***
 
-> 
+>  Message Request type
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
@@ -117,7 +114,9 @@
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |embed|[Embed](#embed)|object| embed message|-|false|
-|ex|[External](#external)|object|***TODO***|-|false|
+|name0|string (oneof test_oneof)|string| test oneof name 0|-|false|
+|name1|string (oneof test_oneof)|string| test oneof name 1|-|false|
+|name2|string (oneof test_oneof)|string| test oneof name 2|-|false|
 
 
 
@@ -128,9 +127,9 @@
   "embed": {
     "id": 0
   },
-  "ex": {
-    "id": 0
-  }
+  "name0": "string",
+  "name1": "string",
+  "name2": "string"
 }
 ```
 
@@ -145,7 +144,7 @@
 
 * 请求类型: ***Request***
 
-> 
+>  Message Request type
 
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
@@ -165,7 +164,9 @@
 |字段|protobuf 类型|json 类型|说明|默认值|是否必传|
 |---|---|---|---|---|---|
 |embed|[Embed](#embed)|object| embed message|-|false|
-|ex|[External](#external)|object|***TODO***|-|false|
+|name0|string (oneof test_oneof)|string| test oneof name 0|-|false|
+|name1|string (oneof test_oneof)|string| test oneof name 1|-|false|
+|name2|string (oneof test_oneof)|string| test oneof name 2|-|false|
 
 
 
@@ -199,17 +200,6 @@
 
 
 
-
-
-<h3 id="external">External</h3>
-
-> 
-
-* 字段说明
-
-|字段|protobuf 类型|json 类型|说明|默认值|是否必传|
-|---|---|---|---|---|---|
-|id|int|number/string|***TODO***|-|false|
 
 
 <h3 id="embed">Embed</h3>

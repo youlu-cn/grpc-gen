@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package example;
-
-message External {
-    int32 id = 1;
-}

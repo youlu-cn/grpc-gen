@@ -7,11 +7,11 @@ const fileTpl = `
 
 > 接口列表
 
-{{ range $v := (toc .) }}
-{{ if $v.Interface }}
-	* [{{ $v.Name.UpperCamelCase }}{{ if $v.Gateway }} ({{ $v.Gateway }}){{ end }}](#{{ anchor $v.Name }}) - {{ $v.Comment }}
-{{ else }}
-* [{{ $v.Name.UpperCamelCase }}](#{{ anchor $v.Name }}) - {{ $v.Comment }}
+{{ range $svc := .Services }}
+* [{{ $svc.Name.UpperCamelCase }}](#{{ anchor $svc.Name }}) - {{ tocComment $svc.SourceCodeInfo }}
+{{ range $method := $svc.Methods }}
+{{ $url := (gatewayUrl $method) }}
+	* [{{ $method.Name.UpperCamelCase }}{{ if $url }} ({{ $url }}){{ end }}](#{{ anchor $method.Name }}) - {{ tocComment $method.SourceCodeInfo }}
 {{ end }}
 {{ end }}
 
