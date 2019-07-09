@@ -18,7 +18,7 @@ func (fn Func) Access(svc pgs.Service) map[string]auth.AccessLevel {
 	out := make(map[string]auth.AccessLevel)
 
 	for _, method := range svc.Methods() {
-		fullPath := fmt.Sprintf("/%s.%s/%s", svc.Package().ProtoName(), svc.Name(), method.Name())
+		fullPath := fmt.Sprintf("/%s.%s/%s", svc.Package().ProtoName(), svc.Name(), method.Name().UpperCamelCase())
 		out[fullPath] = auth.AccessLevel__NO_LIMIT
 
 		opts := method.Descriptor().GetOptions()
