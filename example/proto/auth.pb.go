@@ -26,313 +26,75 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type RequestType int32
-
-const (
-	RequestType__NONE RequestType = 0
-	RequestType_TYPE1 RequestType = 1
-	// request type 2
-	RequestType_TYPE2 RequestType = 2
-)
-
-var RequestType_name = map[int32]string{
-	0: "_NONE",
-	1: "TYPE1",
-	2: "TYPE2",
-}
-
-var RequestType_value = map[string]int32{
-	"_NONE": 0,
-	"TYPE1": 1,
-	"TYPE2": 2,
-}
-
-func (x RequestType) Enum() *RequestType {
-	p := new(RequestType)
-	*p = x
-	return p
-}
-
-func (x RequestType) String() string {
-	return proto.EnumName(RequestType_name, int32(x))
-}
-
-func (x *RequestType) UnmarshalJSON(data []byte) error {
-	value, err := proto.UnmarshalJSONEnum(RequestType_value, data, "RequestType")
-	if err != nil {
-		return err
-	}
-	*x = RequestType(value)
-	return nil
-}
-
-func (RequestType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_8bbd6f3875b0e874, []int{0}
-}
-
 //
+// 消息类型注释，支持多行，
+// 支持 markdown 语法：
 //
-// Message Request type
+// > blockquote
 //
-type Request struct {
-	//
-	// leading comment
-	// 2rd comment line
-	//
-	Id                   *int32                 `protobuf:"varint,1,req,name=id" json:"id,omitempty"`
-	Name                 *string                `protobuf:"bytes,2,opt,name=name,def=abc" json:"name,omitempty"`
-	Type                 *RequestType           `protobuf:"varint,3,opt,name=type,enum=example.RequestType" json:"type,omitempty"`
-	Array                []string               `protobuf:"bytes,4,rep,name=array" json:"array,omitempty"`
-	Map                  map[string]RequestType `protobuf:"bytes,5,rep,name=map" json:"map,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=example.RequestType"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
-}
-
-func (m *Request) Reset()         { *m = Request{} }
-func (m *Request) String() string { return proto.CompactTextString(m) }
-func (*Request) ProtoMessage()    {}
-func (*Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8bbd6f3875b0e874, []int{0}
-}
-
-func (m *Request) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Request.Unmarshal(m, b)
-}
-func (m *Request) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Request.Marshal(b, m, deterministic)
-}
-func (m *Request) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Request.Merge(m, src)
-}
-func (m *Request) XXX_Size() int {
-	return xxx_messageInfo_Request.Size(m)
-}
-func (m *Request) XXX_DiscardUnknown() {
-	xxx_messageInfo_Request.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Request proto.InternalMessageInfo
-
-const Default_Request_Name string = "abc"
-
-func (m *Request) GetId() int32 {
-	if m != nil && m.Id != nil {
-		return *m.Id
-	}
-	return 0
-}
-
-func (m *Request) GetName() string {
-	if m != nil && m.Name != nil {
-		return *m.Name
-	}
-	return Default_Request_Name
-}
-
-func (m *Request) GetType() RequestType {
-	if m != nil && m.Type != nil {
-		return *m.Type
-	}
-	return RequestType__NONE
-}
-
-func (m *Request) GetArray() []string {
-	if m != nil {
-		return m.Array
-	}
-	return nil
-}
-
-func (m *Request) GetMap() map[string]RequestType {
-	if m != nil {
-		return m.Map
-	}
-	return nil
-}
-
-type Response struct {
-	Embed *Response_Embed `protobuf:"bytes,1,opt,name=embed" json:"embed,omitempty"`
-	// Types that are valid to be assigned to TestOneof:
-	//	*Response_Name0
-	//	*Response_Name1
-	//	*Response_Name2
-	TestOneof            isResponse_TestOneof `protobuf_oneof:"test_oneof"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
-	XXX_unrecognized     []byte               `json:"-"`
-	XXX_sizecache        int32                `json:"-"`
-}
-
-func (m *Response) Reset()         { *m = Response{} }
-func (m *Response) String() string { return proto.CompactTextString(m) }
-func (*Response) ProtoMessage()    {}
-func (*Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8bbd6f3875b0e874, []int{1}
-}
-
-func (m *Response) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Response.Unmarshal(m, b)
-}
-func (m *Response) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Response.Marshal(b, m, deterministic)
-}
-func (m *Response) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Response.Merge(m, src)
-}
-func (m *Response) XXX_Size() int {
-	return xxx_messageInfo_Response.Size(m)
-}
-func (m *Response) XXX_DiscardUnknown() {
-	xxx_messageInfo_Response.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Response proto.InternalMessageInfo
-
-func (m *Response) GetEmbed() *Response_Embed {
-	if m != nil {
-		return m.Embed
-	}
-	return nil
-}
-
-type isResponse_TestOneof interface {
-	isResponse_TestOneof()
-}
-
-type Response_Name0 struct {
-	Name0 string `protobuf:"bytes,2,opt,name=name0,oneof"`
-}
-
-type Response_Name1 struct {
-	Name1 string `protobuf:"bytes,3,opt,name=name1,oneof"`
-}
-
-type Response_Name2 struct {
-	Name2 string `protobuf:"bytes,4,opt,name=name2,oneof"`
-}
-
-func (*Response_Name0) isResponse_TestOneof() {}
-
-func (*Response_Name1) isResponse_TestOneof() {}
-
-func (*Response_Name2) isResponse_TestOneof() {}
-
-func (m *Response) GetTestOneof() isResponse_TestOneof {
-	if m != nil {
-		return m.TestOneof
-	}
-	return nil
-}
-
-func (m *Response) GetName0() string {
-	if x, ok := m.GetTestOneof().(*Response_Name0); ok {
-		return x.Name0
-	}
-	return ""
-}
-
-func (m *Response) GetName1() string {
-	if x, ok := m.GetTestOneof().(*Response_Name1); ok {
-		return x.Name1
-	}
-	return ""
-}
-
-func (m *Response) GetName2() string {
-	if x, ok := m.GetTestOneof().(*Response_Name2); ok {
-		return x.Name2
-	}
-	return ""
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*Response) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*Response_Name0)(nil),
-		(*Response_Name1)(nil),
-		(*Response_Name2)(nil),
-	}
-}
-
-type Response_Embed struct {
-	Id                   *int32   `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+// | Syntax | Description |
+// | ----------- | ----------- |
+// | Header | Title |
+// | Paragraph | Text |
+//
+type ExampleMessage struct {
+	Id                   uint64   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *Response_Embed) Reset()         { *m = Response_Embed{} }
-func (m *Response_Embed) String() string { return proto.CompactTextString(m) }
-func (*Response_Embed) ProtoMessage()    {}
-func (*Response_Embed) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8bbd6f3875b0e874, []int{1, 0}
+func (m *ExampleMessage) Reset()         { *m = ExampleMessage{} }
+func (m *ExampleMessage) String() string { return proto.CompactTextString(m) }
+func (*ExampleMessage) ProtoMessage()    {}
+func (*ExampleMessage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8bbd6f3875b0e874, []int{0}
 }
 
-func (m *Response_Embed) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Response_Embed.Unmarshal(m, b)
+func (m *ExampleMessage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExampleMessage.Unmarshal(m, b)
 }
-func (m *Response_Embed) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Response_Embed.Marshal(b, m, deterministic)
+func (m *ExampleMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExampleMessage.Marshal(b, m, deterministic)
 }
-func (m *Response_Embed) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Response_Embed.Merge(m, src)
+func (m *ExampleMessage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExampleMessage.Merge(m, src)
 }
-func (m *Response_Embed) XXX_Size() int {
-	return xxx_messageInfo_Response_Embed.Size(m)
+func (m *ExampleMessage) XXX_Size() int {
+	return xxx_messageInfo_ExampleMessage.Size(m)
 }
-func (m *Response_Embed) XXX_DiscardUnknown() {
-	xxx_messageInfo_Response_Embed.DiscardUnknown(m)
+func (m *ExampleMessage) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExampleMessage.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Response_Embed proto.InternalMessageInfo
+var xxx_messageInfo_ExampleMessage proto.InternalMessageInfo
 
-func (m *Response_Embed) GetId() int32 {
-	if m != nil && m.Id != nil {
-		return *m.Id
+func (m *ExampleMessage) GetId() uint64 {
+	if m != nil {
+		return m.Id
 	}
 	return 0
 }
 
 func init() {
-	proto.RegisterEnum("example.RequestType", RequestType_name, RequestType_value)
-	proto.RegisterType((*Request)(nil), "example.Request")
-	proto.RegisterMapType((map[string]RequestType)(nil), "example.Request.MapEntry")
-	proto.RegisterType((*Response)(nil), "example.Response")
-	proto.RegisterType((*Response_Embed)(nil), "example.Response.Embed")
+	proto.RegisterType((*ExampleMessage)(nil), "example.ExampleMessage")
 }
 
 func init() { proto.RegisterFile("auth.proto", fileDescriptor_8bbd6f3875b0e874) }
 
 var fileDescriptor_8bbd6f3875b0e874 = []byte{
-	// 441 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x90, 0x41, 0x6e, 0x13, 0x31,
-	0x14, 0x86, 0x63, 0x3b, 0x26, 0x93, 0x17, 0x28, 0xc3, 0x53, 0xd5, 0x0c, 0xa3, 0x2e, 0x46, 0x59,
-	0x8d, 0x8a, 0x98, 0x10, 0x03, 0x12, 0xea, 0x12, 0x31, 0x12, 0x42, 0x50, 0x90, 0xd5, 0x2e, 0x58,
-	0x55, 0x2e, 0x31, 0x25, 0x22, 0x19, 0x0f, 0x19, 0x07, 0x31, 0xdb, 0x9c, 0x00, 0x29, 0x1c, 0x82,
-	0x73, 0x74, 0xc5, 0x9e, 0x2b, 0xb0, 0xe5, 0x0e, 0xc8, 0xe3, 0xa4, 0x8a, 0x5a, 0x21, 0x75, 0xf7,
-	0xfc, 0xfb, 0x7f, 0x9f, 0xfe, 0xf7, 0x03, 0xa8, 0x85, 0xfd, 0x94, 0x95, 0x73, 0x63, 0x0d, 0x76,
-	0xf4, 0x37, 0x35, 0x2b, 0xa7, 0x3a, 0xde, 0x73, 0xe2, 0x50, 0x15, 0x85, 0xb1, 0xca, 0x4e, 0x4c,
-	0x51, 0x79, 0x43, 0xbc, 0x7f, 0x6e, 0xcc, 0xf9, 0x54, 0x0f, 0x55, 0x39, 0xb9, 0xfe, 0x3b, 0xf8,
-	0x4b, 0xa0, 0x23, 0xf5, 0x97, 0x85, 0xae, 0x2c, 0xee, 0x00, 0x9d, 0x8c, 0x23, 0x92, 0xd0, 0x94,
-	0x4b, 0x3a, 0x19, 0x63, 0x1f, 0xda, 0x85, 0x9a, 0xe9, 0x88, 0x26, 0x24, 0xed, 0x1e, 0x32, 0x75,
-	0xf6, 0x41, 0x36, 0x02, 0xa6, 0xd0, 0xb6, 0x75, 0xa9, 0x23, 0x96, 0x90, 0x74, 0x47, 0xec, 0x66,
-	0xeb, 0x08, 0xd9, 0x1a, 0x74, 0x5c, 0x97, 0x5a, 0x36, 0x0e, 0xdc, 0x05, 0xae, 0xe6, 0x73, 0x55,
-	0x47, 0xed, 0x84, 0xa5, 0x5d, 0xe9, 0x1f, 0xf8, 0x00, 0xd8, 0x4c, 0x95, 0x11, 0x4f, 0x58, 0xda,
-	0x13, 0xf7, 0xaf, 0xae, 0x67, 0x6f, 0x54, 0x99, 0x17, 0x76, 0x5e, 0x4b, 0xe7, 0x8a, 0x5f, 0x43,
-	0xb0, 0x11, 0x30, 0x04, 0xf6, 0x59, 0xd7, 0x11, 0x71, 0x81, 0xa4, 0x1b, 0xf1, 0x00, 0xf8, 0x57,
-	0x35, 0x5d, 0xf8, 0x90, 0xff, 0xcb, 0xe2, 0x2d, 0x87, 0xf4, 0x19, 0x19, 0xfc, 0x24, 0x10, 0x48,
-	0x5d, 0x95, 0xa6, 0xa8, 0x34, 0x3e, 0x04, 0xae, 0x67, 0x67, 0x7a, 0xdc, 0x00, 0x7b, 0xa2, 0xbf,
-	0xb5, 0xec, 0x1d, 0x59, 0xee, 0xbe, 0xa5, 0x77, 0xe1, 0x1e, 0x70, 0x77, 0xfe, 0x23, 0x5f, 0xc8,
-	0xcb, 0x96, 0xf4, 0xcf, 0x8d, 0x3e, 0x6a, 0xfa, 0xb8, 0xd4, 0x47, 0x1b, 0x5d, 0x44, 0xed, 0x6d,
-	0x5d, 0xc4, 0x7d, 0xe0, 0x0d, 0xf7, 0xb2, 0x70, 0xe2, 0x0b, 0x7f, 0x7e, 0x1b, 0xc0, 0xea, 0xca,
-	0x9e, 0x9a, 0x42, 0x9b, 0x8f, 0x07, 0x19, 0xf4, 0xb6, 0x8e, 0xc0, 0x2e, 0xf0, 0xd3, 0xa3, 0xb7,
-	0x47, 0x79, 0xd8, 0x72, 0xe3, 0xf1, 0xfb, 0x77, 0xf9, 0x28, 0x24, 0x9b, 0x51, 0x84, 0x54, 0xbc,
-	0x80, 0x4e, 0xee, 0xf3, 0xe3, 0x13, 0xe0, 0x0e, 0x34, 0xc2, 0xf0, 0x6a, 0x1f, 0xf1, 0xbd, 0x6b,
-	0x47, 0x0e, 0x6e, 0x5d, 0xac, 0x08, 0x0d, 0xc6, 0x31, 0x5b, 0x9e, 0xb4, 0xc4, 0x0f, 0x02, 0xc1,
-	0x1a, 0x23, 0xf0, 0x95, 0xe7, 0x88, 0x9b, 0x71, 0xf6, 0x2f, 0x56, 0x84, 0x05, 0xbf, 0xc8, 0xf2,
-	0xf7, 0x9f, 0x15, 0xbd, 0x8b, 0x77, 0x86, 0x6b, 0xc7, 0xd0, 0x31, 0xf0, 0xa9, 0x67, 0x3d, 0xbe,
-	0x19, 0xab, 0xd3, 0xb0, 0xbe, 0xb3, 0x98, 0x2f, 0x4f, 0x68, 0x40, 0xff, 0x05, 0x00, 0x00, 0xff,
-	0xff, 0x50, 0x70, 0x34, 0x29, 0xf3, 0x02, 0x00, 0x00,
+	// 168 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x2c, 0x2d, 0xc9,
+	0xd0, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x4f, 0xad, 0x48, 0xcc, 0x2d, 0xc8, 0x49, 0x95,
+	0x12, 0x03, 0x09, 0xea, 0x27, 0xe6, 0xe5, 0xe5, 0x97, 0x24, 0x96, 0x64, 0xe6, 0xe7, 0x15, 0x43,
+	0x14, 0x48, 0xc9, 0xa4, 0xe7, 0xe7, 0xa7, 0xe7, 0xa4, 0xea, 0x27, 0x16, 0x64, 0x62, 0xca, 0x2a,
+	0x29, 0x70, 0xf1, 0xb9, 0x42, 0x0c, 0xf0, 0x4d, 0x2d, 0x2e, 0x4e, 0x4c, 0x4f, 0x15, 0xe2, 0xe3,
+	0x62, 0xca, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x09, 0x62, 0xca, 0x4c, 0x31, 0xca, 0xe0,
+	0x62, 0x87, 0xaa, 0x10, 0x8a, 0xe0, 0x62, 0x29, 0x49, 0x2d, 0x2e, 0x11, 0x12, 0xd7, 0x83, 0x5a,
+	0xaa, 0x87, 0xaa, 0x57, 0x0a, 0x97, 0x84, 0x92, 0xdc, 0xa1, 0xc9, 0x8c, 0x4c, 0x1c, 0x29, 0x4d,
+	0x97, 0x9f, 0x4c, 0x66, 0x12, 0x52, 0xe2, 0xd5, 0x87, 0x2a, 0xd3, 0x07, 0x19, 0x67, 0xc5, 0xa8,
+	0x25, 0xc5, 0xdc, 0x14, 0xca, 0x90, 0xc4, 0x06, 0x76, 0x92, 0x31, 0x20, 0x00, 0x00, 0xff, 0xff,
+	0x07, 0xc8, 0xab, 0xc6, 0xdf, 0x00, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -347,8 +109,13 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ExampleClient interface {
-	// test1 comment
-	Test1(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	//
+	// 方法说明，支持 markdown
+	//
+	// - [x] Write the press release
+	// - [ ] Update the website
+	// - [ ] Contact the media
+	Test(ctx context.Context, in *ExampleMessage, opts ...grpc.CallOption) (*ExampleMessage, error)
 }
 
 type exampleClient struct {
@@ -359,9 +126,9 @@ func NewExampleClient(cc *grpc.ClientConn) ExampleClient {
 	return &exampleClient{cc}
 }
 
-func (c *exampleClient) Test1(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/example.Example/test1", in, out, opts...)
+func (c *exampleClient) Test(ctx context.Context, in *ExampleMessage, opts ...grpc.CallOption) (*ExampleMessage, error) {
+	out := new(ExampleMessage)
+	err := c.cc.Invoke(ctx, "/example.Example/test", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -370,36 +137,41 @@ func (c *exampleClient) Test1(ctx context.Context, in *Request, opts ...grpc.Cal
 
 // ExampleServer is the server API for Example service.
 type ExampleServer interface {
-	// test1 comment
-	Test1(context.Context, *Request) (*Response, error)
+	//
+	// 方法说明，支持 markdown
+	//
+	// - [x] Write the press release
+	// - [ ] Update the website
+	// - [ ] Contact the media
+	Test(context.Context, *ExampleMessage) (*ExampleMessage, error)
 }
 
 // UnimplementedExampleServer can be embedded to have forward compatible implementations.
 type UnimplementedExampleServer struct {
 }
 
-func (*UnimplementedExampleServer) Test1(ctx context.Context, req *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Test1 not implemented")
+func (*UnimplementedExampleServer) Test(ctx context.Context, req *ExampleMessage) (*ExampleMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Test not implemented")
 }
 
 func RegisterExampleServer(s *grpc.Server, srv ExampleServer) {
 	s.RegisterService(&_Example_serviceDesc, srv)
 }
 
-func _Example_Test1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+func _Example_Test_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExampleMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExampleServer).Test1(ctx, in)
+		return srv.(ExampleServer).Test(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/example.Example/Test1",
+		FullMethod: "/example.Example/Test",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExampleServer).Test1(ctx, req.(*Request))
+		return srv.(ExampleServer).Test(ctx, req.(*ExampleMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -409,120 +181,8 @@ var _Example_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExampleServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "test1",
-			Handler:    _Example_Test1_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "auth.proto",
-}
-
-// Example2Client is the client API for Example2 service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type Example2Client interface {
-	// test2 comment
-	Test2(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
-	// test3 interface
-	Test3(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
-}
-
-type example2Client struct {
-	cc *grpc.ClientConn
-}
-
-func NewExample2Client(cc *grpc.ClientConn) Example2Client {
-	return &example2Client{cc}
-}
-
-func (c *example2Client) Test2(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/example.Example2/test2", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *example2Client) Test3(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/example.Example2/test3", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Example2Server is the server API for Example2 service.
-type Example2Server interface {
-	// test2 comment
-	Test2(context.Context, *Request) (*Response, error)
-	// test3 interface
-	Test3(context.Context, *Request) (*Response, error)
-}
-
-// UnimplementedExample2Server can be embedded to have forward compatible implementations.
-type UnimplementedExample2Server struct {
-}
-
-func (*UnimplementedExample2Server) Test2(ctx context.Context, req *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Test2 not implemented")
-}
-func (*UnimplementedExample2Server) Test3(ctx context.Context, req *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Test3 not implemented")
-}
-
-func RegisterExample2Server(s *grpc.Server, srv Example2Server) {
-	s.RegisterService(&_Example2_serviceDesc, srv)
-}
-
-func _Example2_Test2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(Example2Server).Test2(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/example.Example2/Test2",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Example2Server).Test2(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Example2_Test3_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(Example2Server).Test3(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/example.Example2/Test3",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(Example2Server).Test3(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _Example2_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "example.Example2",
-	HandlerType: (*Example2Server)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "test2",
-			Handler:    _Example2_Test2_Handler,
-		},
-		{
-			MethodName: "test3",
-			Handler:    _Example2_Test3_Handler,
+			MethodName: "test",
+			Handler:    _Example_Test_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
