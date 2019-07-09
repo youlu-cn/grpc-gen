@@ -6,7 +6,7 @@
 > APIs
 
 
-* [Example](#example) - 服务说明，支持 markdown 语法，
+* [Example](#example) - 服务说明，支持 markdown 语法
 
 
 	* [Test (/example/test)](#test) - 方法说明，支持 markdown
@@ -17,7 +17,7 @@
 
 <h2 id="example">Example</h2>
 
->  服务说明，支持 markdown 语法，
+>  服务说明，支持 markdown 语法
 > 
 >  1. First item
 >  2. Second item

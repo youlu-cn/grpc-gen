@@ -5,9 +5,9 @@
 
 
 
-## [Example](auth.proto.md#example) - 服务说明，支持 markdown 语法，
+## [Example](auth.proto.md#example) - 服务说明，支持 markdown 语法
 
->  服务说明，支持 markdown 语法，
+>  服务说明，支持 markdown 语法
 > 
 >  1. First item
 >  2. Second item
