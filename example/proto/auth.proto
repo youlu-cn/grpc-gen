@@ -1,86 +1,57 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package example;
 
 import "auth/annotations.proto";
 import "google/api/annotations.proto";
 
-enum RequestType {
-    _NONE = 0;
-    TYPE1 = 1; // request type 1
-    // request type 2
-    TYPE2 = 2;
+//
+// 消息类型注释，支持多行，
+// 支持 markdown 语法：
+//
+// > blockquote
+//
+// | Syntax | Description |
+// | ----------- | ----------- |
+// | Header | Title |
+// | Paragraph | Text |
+//
+message ExampleMessage {
+    uint64 id = 1; // 字段注释，简洁
 }
 
 //
+// 服务说明，支持 markdown 语法
 //
-// Message Request type
+// 1. First item
+// 2. Second item
+// 3. Third item
 //
-message Request {
-    //
-    // leading comment
-    // 2rd comment line
-    //
-    required int32 id = 1;
-    optional string name = 2 [default="abc"];
-    optional RequestType type = 3; // enum field
-    repeated string array = 4; // string array
-    map<string, RequestType> map = 5; // map field
-}
-
-message Response {
-    message Embed {
-        optional int32 id = 1; // response id
-    }
-
-    optional Embed embed = 1; // embed message
-
-    oneof test_oneof {
-        string name0 = 2; // test oneof name 0
-        string name1 = 3; // test oneof name 1
-        string name2 = 4; // test oneof name 2
-    }
-}
-
-// Example Service.
-//
-// # markdown h1
-// > markdown test
+// ```json
+// {
+//   "firstName": "John",
+//   "lastName": "Smith",
+//   "age": 25
+// }
+// ```
 service Example {
-    // service scope
     option (auth.visible) = {
-        scope: PUBLIC_SCOPE
+        scope: PUBLIC_SCOPE // Service scope：仅内网可见或对外可见
     };
 
-    // test1 comment
-    rpc test1 (Request) returns (Response) {
+    //
+    // 方法说明，支持 markdown
+    //
+    // - [x] Write the press release
+    // - [ ] Update the website
+    // - [ ] Contact the media
+    rpc test (ExampleMessage) returns (ExampleMessage) {
         option (auth.access) = {
-            level: LOW_ACCESS_LEVEL
-        };
-    }
-}
-
-// Example2 Service.
-service Example2 {
-    // service scope
-    option (auth.visible) = {
-        scope: ALL_SCOPE
-    };
-
-    // test2 comment
-    rpc test2 (Request) returns (Response) {
-        option (auth.access) = {
-            level: MIDDLE_ACCESS_LEVEL
+            level: LOW_ACCESS_LEVEL // 接口请求权限
         };
         option (google.api.http) = {
-            get: "/example/test"
-        };
-    }
-
-    // test3 interface
-    rpc test3 (Request) returns (Response) {
-        option (auth.access) = {
-            level: SERVER_INTERNAL
+            post: "/example/test"
+            body: "*"
         };
     }
 }

@@ -28,26 +28,26 @@ var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
-var (
-	filter_Example2_Test2_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
-func request_Example2_Test2_0(ctx context.Context, marshaler runtime.Marshaler, client Example2Client, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq Request
+func request_Example_Test_0(ctx context.Context, marshaler runtime.Marshaler, client ExampleClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ExampleMessage
 	var metadata runtime.ServerMetadata
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Example2_Test2_0); err != nil {
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.Test2(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.Test(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-// RegisterExample2HandlerFromEndpoint is same as RegisterExample2Handler but
+// RegisterExampleHandlerFromEndpoint is same as RegisterExampleHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterExample2HandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterExampleHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -67,23 +67,23 @@ func RegisterExample2HandlerFromEndpoint(ctx context.Context, mux *runtime.Serve
 		}()
 	}()
 
-	return RegisterExample2Handler(ctx, mux, conn)
+	return RegisterExampleHandler(ctx, mux, conn)
 }
 
-// RegisterExample2Handler registers the http handlers for service Example2 to "mux".
+// RegisterExampleHandler registers the http handlers for service Example to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterExample2Handler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterExample2HandlerClient(ctx, mux, NewExample2Client(conn))
+func RegisterExampleHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterExampleHandlerClient(ctx, mux, NewExampleClient(conn))
 }
 
-// RegisterExample2HandlerClient registers the http handlers for service Example2
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "Example2Client".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "Example2Client"
+// RegisterExampleHandlerClient registers the http handlers for service Example
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ExampleClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ExampleClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "Example2Client" to call the correct interceptors.
-func RegisterExample2HandlerClient(ctx context.Context, mux *runtime.ServeMux, client Example2Client) error {
+// "ExampleClient" to call the correct interceptors.
+func RegisterExampleHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ExampleClient) error {
 
-	mux.Handle("GET", pattern_Example2_Test2_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_Example_Test_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -92,14 +92,14 @@ func RegisterExample2HandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Example2_Test2_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Example_Test_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Example2_Test2_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Example_Test_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -107,9 +107,9 @@ func RegisterExample2HandlerClient(ctx context.Context, mux *runtime.ServeMux, c
 }
 
 var (
-	pattern_Example2_Test2_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"example", "test"}, ""))
+	pattern_Example_Test_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"example", "test"}, ""))
 )
 
 var (
-	forward_Example2_Test2_0 = runtime.ForwardResponseMessage
+	forward_Example_Test_0 = runtime.ForwardResponseMessage
 )
