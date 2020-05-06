@@ -11,19 +11,17 @@ var _levelExample = map[string]auth.AccessLevel{
 	"/example.Example/Test": auth.AccessLevel_LOW_ACCESS_LEVEL,
 }
 
-func AccessLevelOfExample(fullPath string) auth.AccessLevel {
-	return _levelExample[fullPath]
-}
-
 // Register scoped gRPC server.
-func RegisterExampleScopeServer(s auth.Service, srv interface{}) {
-	for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_PUBLIC_SCOPE) {
-		grpc.RegisterService(&_Example_serviceDesc, srv)
-	}
-}
+func RegisterExampleScopeServer(a auth.Authenticator, s auth.Implementor, srv ExampleServer) error {
+	// Set service access level.
+	a.SetAccessLevel(_levelExample)
 
-// Register scoped gateway handler.
-func RegisterExampleScopeHandler(s auth.Service) error {
+	// Register scoped gRPC server.
+	for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_PUBLIC_SCOPE) {
+		RegisterExampleServer(grpc, srv)
+	}
+
+	// Register scoped gateway handler.
 	return s.RegisterGateway(auth.VisibleScope_PUBLIC_SCOPE, RegisterExampleHandler)
 
 }

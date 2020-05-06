@@ -11,19 +11,15 @@ import (
 
 type GatewayHandler func(context.Context, *runtime.ServeMux, *grpc.ClientConn) error
 
-type Service interface {
-	ScopedGRPCServer(scope VisibleScope) []*grpc.Server
-	RegisterGateway(scope VisibleScope, handlers ...GatewayHandler) error
-}
-
-// gRPC implementor interface.
 type Implementor interface {
-	AccessLevel(fullPath string) AccessLevel
+	ScopedGRPCServer(scope VisibleScope) []*grpc.Server
+	RegisterGateway(scope VisibleScope, handlers GatewayHandler) error
 }
 
 // Server authenticator interface.
 type Authenticator interface {
-	Authenticate(ctx context.Context, level AccessLevel) error
+	SetAccessLevel(map[string]AccessLevel)
+	Authenticate(ctx context.Context, fullMethod string) error
 }
 
 // UnaryServerInterceptor returns a new unary server interceptor that authenticates incoming messages.
@@ -31,11 +27,7 @@ type Authenticator interface {
 // Invalid messages will be rejected with `PermissionDenied` before reaching any userspace handlers.
 func UnaryServerInterceptor(v Authenticator) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		gRPCService, ok := info.Server.(Implementor)
-		if !ok {
-			return nil, status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
-		}
-		if err := v.Authenticate(ctx, gRPCService.AccessLevel(info.FullMethod)); err != nil {
+		if err := v.Authenticate(ctx, info.FullMethod); err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, err.Error())
 		}
 		return handler(ctx, req)
@@ -50,11 +42,7 @@ func UnaryServerInterceptor(v Authenticator) grpc.UnaryServerInterceptor {
 // calls to `stream.Recv()`.
 func StreamServerInterceptor(v Authenticator) grpc.StreamServerInterceptor {
 	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		gRPCService, ok := srv.(Implementor)
-		if !ok {
-			return status.Errorf(codes.Unimplemented, "server not implement gRPC Implementor")
-		}
-		if err := v.Authenticate(stream.Context(), gRPCService.AccessLevel(info.FullMethod)); err != nil {
+		if err := v.Authenticate(stream.Context(), info.FullMethod); err != nil {
 			return status.Errorf(codes.Unauthenticated, err.Error())
 		}
 		return handler(srv, stream)

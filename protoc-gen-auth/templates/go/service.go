@@ -6,19 +6,17 @@ const serviceTpl = `
 		{{ end }}
 	}
 
-	func AccessLevelOf{{ .Name.UpperCamelCase }}(fullPath string) auth.AccessLevel {
-		return _level{{ .Name.UpperCamelCase }}[fullPath]
-	}
-
 	// Register scoped gRPC server.
-	func Register{{ .Name.UpperCamelCase }}ScopeServer(s auth.Service, srv interface{}) {
-		for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_{{ (scope .) }}) {
-			grpc.RegisterService(&_{{ .Name.UpperCamelCase }}_serviceDesc, srv)
-		}
-	}
+	func Register{{ .Name.UpperCamelCase }}ScopeServer(a auth.Authenticator, s auth.Implementor, srv {{ .Name.UpperCamelCase }}Server) error {
+		// Set service access level.
+		a.SetAccessLevel(_level{{ .Name.UpperCamelCase }})
 
-	// Register scoped gateway handler.
-	func Register{{ .Name.UpperCamelCase }}ScopeHandler(s auth.Service) error {
+		// Register scoped gRPC server.
+		for _, grpc := range s.ScopedGRPCServer(auth.VisibleScope_{{ (scope .) }}) {
+			Register{{ .Name.UpperCamelCase }}Server(grpc, srv)
+		}
+
+		// Register scoped gateway handler.
 		{{ if (hasGw .) }}return s.RegisterGateway(auth.VisibleScope_{{ (scope .) }}, Register{{ .Name.UpperCamelCase }}Handler)
 		{{ else }}// No gateway generated.
 		return nil
